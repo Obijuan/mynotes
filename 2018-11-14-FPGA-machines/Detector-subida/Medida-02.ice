@@ -46,7 +46,7 @@
           },
           "position": {
             "x": 696,
-            "y": 128
+            "y": 48
           }
         },
         {
@@ -86,6 +86,25 @@
           "position": {
             "x": 872,
             "y": 232
+          }
+        },
+        {
+          "id": "6e308a41-ecdf-4c86-a4ff-67e444bc450e",
+          "type": "basic.output",
+          "data": {
+            "name": "Canal 3",
+            "pins": [
+              {
+                "index": "0",
+                "name": "D4",
+                "value": "115"
+              }
+            ],
+            "virtual": false
+          },
+          "position": {
+            "x": 1064,
+            "y": 336
           }
         },
         {
@@ -149,7 +168,7 @@
           },
           "position": {
             "x": 720,
-            "y": 104
+            "y": 24
           },
           "size": {
             "width": 88,
@@ -164,7 +183,7 @@
             "readonly": true
           },
           "position": {
-            "x": 896,
+            "x": 904,
             "y": 208
           },
           "size": {
@@ -208,8 +227,8 @@
             "readonly": true
           },
           "position": {
-            "x": 680,
-            "y": 312
+            "x": 688,
+            "y": 168
           },
           "size": {
             "width": 248,
@@ -230,6 +249,34 @@
           "size": {
             "width": 168,
             "height": 88
+          }
+        },
+        {
+          "id": "3db001fe-bf0d-4ac7-8025-513414a075d7",
+          "type": "1c7dae7144d376f2ee4896fcc502a29110e2db37",
+          "position": {
+            "x": 904,
+            "y": 336
+          },
+          "size": {
+            "width": 96,
+            "height": 64
+          }
+        },
+        {
+          "id": "b745fa0b-cac9-4130-acc2-dc6e242e9ac7",
+          "type": "basic.info",
+          "data": {
+            "info": "Salida 2",
+            "readonly": true
+          },
+          "position": {
+            "x": 1088,
+            "y": 296
+          },
+          "size": {
+            "width": 80,
+            "height": 32
           }
         }
       ],
@@ -302,7 +349,7 @@
           "vertices": [
             {
               "x": 664,
-              "y": 208
+              "y": 128
             }
           ]
         },
@@ -314,6 +361,26 @@
           "target": {
             "block": "dca05d0e-8096-42b4-b052-4735a0726a7e",
             "port": "in"
+          }
+        },
+        {
+          "source": {
+            "block": "3db001fe-bf0d-4ac7-8025-513414a075d7",
+            "port": "aa84d31e-cd92-44c7-bb38-c7a4cd903a78"
+          },
+          "target": {
+            "block": "6e308a41-ecdf-4c86-a4ff-67e444bc450e",
+            "port": "in"
+          }
+        },
+        {
+          "source": {
+            "block": "140251d0-322d-440f-a4f0-79ff7322a0ca",
+            "port": "1d2e403f-0fa6-41fd-83a9-4f309eadd855"
+          },
+          "target": {
+            "block": "3db001fe-bf0d-4ac7-8025-513414a075d7",
+            "port": "bf2f0c53-2d04-4cba-aa70-2df85502d24f"
           }
         }
       ]
