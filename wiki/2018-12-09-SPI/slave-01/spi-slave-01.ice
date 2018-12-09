@@ -322,7 +322,7 @@
           "id": "08643d9d-9640-44ac-af3e-8f612c3d9ed3",
           "type": "basic.info",
           "data": {
-            "info": "### Conexiones entre Arduino UNO y Icezum Alhambra\n\n| Pin Arduino  |  Pin Alhambra | Descripción  |\n|--------------|---------------|--------------|\n|  D11 (MOSI)  |   D11         | Arduino->FPGA |\n|  D13 (SCK)   |   D11         | clk        |\n|  GND         |   GND         | Masa         |",
+            "info": "### Conexiones entre Arduino UNO y Icezum Alhambra\n\n| Pin Arduino  |  Pin Alhambra | Descripción  |\n|--------------|---------------|--------------|\n|  D11 (MOSI)  |   D11         | Arduino->FPGA |\n|  D13 (SCK)   |   D13         | Reloj. sck    |\n|  D10 (SS)    |   D10         | Slave select (SS). Arduino ->FPGA |\n|  GND         |   GND         | Masa         |",
             "readonly": true
           },
           "position": {
