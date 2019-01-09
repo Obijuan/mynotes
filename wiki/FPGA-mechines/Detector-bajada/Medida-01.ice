@@ -113,8 +113,8 @@
           }
         },
         {
-          "id": "0e47b197-d3bf-4a01-8555-9c5febe644a1",
-          "type": "d952d5ad56b7cf718a8b6f52dc9ac79b6cb12cdd",
+          "id": "0564a160-bb38-44ed-bd3e-2550b47fbc84",
+          "type": "7994c6fb7d08d360c359638f96c27f67225b699a",
           "position": {
             "x": 840,
             "y": 456
@@ -172,13 +172,13 @@
             "port": "aa84d31e-cd92-44c7-bb38-c7a4cd903a78"
           },
           "target": {
-            "block": "0e47b197-d3bf-4a01-8555-9c5febe644a1",
+            "block": "0564a160-bb38-44ed-bd3e-2550b47fbc84",
             "port": "b6426b43-dcda-418d-b6d3-4764b5bc0b25"
           }
         },
         {
           "source": {
-            "block": "0e47b197-d3bf-4a01-8555-9c5febe644a1",
+            "block": "0564a160-bb38-44ed-bd3e-2550b47fbc84",
             "port": "1d2e403f-0fa6-41fd-83a9-4f309eadd855"
           },
           "target": {
@@ -483,7 +483,7 @@
         }
       }
     },
-    "d952d5ad56b7cf718a8b6f52dc9ac79b6cb12cdd": {
+    "7994c6fb7d08d360c359638f96c27f67225b699a": {
       "package": {
         "name": "Bajada",
         "version": "0.1",
@@ -659,6 +659,38 @@
               "size": {
                 "width": 192,
                 "height": 48
+              }
+            },
+            {
+              "id": "b95823ec-2309-45f2-a7b9-fe0c48e825c6",
+              "type": "basic.info",
+              "data": {
+                "info": "## Detector de flancos de bajada\n\nSe genera un tic cuando llega un flanco de **bajada** por la entrada",
+                "readonly": true
+              },
+              "position": {
+                "x": 16,
+                "y": -168
+              },
+              "size": {
+                "width": 568,
+                "height": 80
+              }
+            },
+            {
+              "id": "c9ad835c-86c9-4857-a42b-fc46eed3f504",
+              "type": "basic.info",
+              "data": {
+                "info": "**Retraso**: 0  \nEl retraso es cero porque el flanco  \nde bajada llega desde la entrada  \na la salida sin pasar por biestables",
+                "readonly": true
+              },
+              "position": {
+                "x": 64,
+                "y": 440
+              },
+              "size": {
+                "width": 320,
+                "height": 80
               }
             }
           ],
