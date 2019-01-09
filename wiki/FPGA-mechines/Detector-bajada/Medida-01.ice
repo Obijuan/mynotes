@@ -123,6 +123,54 @@
             "width": 96,
             "height": 64
           }
+        },
+        {
+          "id": "2988b62b-345c-4176-a693-4b0be6a4ae49",
+          "type": "basic.info",
+          "data": {
+            "info": "**Mediciones del detector de flancos de bajada**  \nconectar el analizador saleae",
+            "readonly": true
+          },
+          "position": {
+            "x": 304,
+            "y": 224
+          },
+          "size": {
+            "width": 392,
+            "height": 56
+          }
+        },
+        {
+          "id": "eaa4fd9d-060b-4e23-9e8b-e5039ff09db6",
+          "type": "basic.info",
+          "data": {
+            "info": "Retraso del detector flancos: 0",
+            "readonly": true
+          },
+          "position": {
+            "x": 792,
+            "y": 544
+          },
+          "size": {
+            "width": 248,
+            "height": 32
+          }
+        },
+        {
+          "id": "b82feb20-d6a4-4a94-ad6d-e695441e354f",
+          "type": "basic.info",
+          "data": {
+            "info": "Medidas con Saleae:\n\n* Frec: 24MHZ\n* Muestras: 100",
+            "readonly": true
+          },
+          "position": {
+            "x": 352,
+            "y": 632
+          },
+          "size": {
+            "width": 168,
+            "height": 88
+          }
         }
       ],
       "wires": [
