@@ -10,6 +10,7 @@ namespace demo {
 class FtdiContextWrapper : public node::ObjectWrap {
  public:
   static void Init(v8::Local<v8::Object> exports);
+  static void NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args);
 
  private:
   explicit FtdiContextWrapper(double value = 0);
