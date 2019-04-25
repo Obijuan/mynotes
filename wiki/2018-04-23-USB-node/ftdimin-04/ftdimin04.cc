@@ -25,12 +25,7 @@ void create_context(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
   HandleScope scope(isolate);
 
-  //struct ftdi_context _ftdic;
-
-  //ftdi_init(&_ftdic);
-
-  //-- Crear el objeto con el contexto dentro
-  //FtdiContextWrapper::NewInstance(args);
+  FtdiContextWrapper::NewInstance(args);
 }
 
 
