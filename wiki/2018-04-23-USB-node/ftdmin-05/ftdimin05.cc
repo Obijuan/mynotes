@@ -55,7 +55,15 @@ void ftdi_usb_open_desc(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(ret);
 }
 
+void ftdi_get_error_string(const v8::FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = Isolate::GetCurrent();
 
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+  const char* ret = ftdi_get_error_string(&ctx->_ftdic);
+
+  args.GetReturnValue().Set(String::NewFromUtf8(isolate, ret));
+}
 
 
 void InitAll(Local<Object> exports) {
@@ -63,6 +71,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "hello", Method);
   NODE_SET_METHOD(exports, "create_context", create_context);
   NODE_SET_METHOD(exports, "ftdi_usb_open_desc", ftdi_usb_open_desc);
+  NODE_SET_METHOD(exports, "ftdi_get_error_string", ftdi_get_error_string);
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, InitAll)
