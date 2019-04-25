@@ -5,7 +5,7 @@ console.log("Llamando a libftdi.hello()");
 console.log(msg)
 
 console.log("Creando contexto")
-//var ctx = libftdi.create_context();
+var ctx = libftdi.create_context();
 
 console.log("Otras pruebas")
 

@@ -21,9 +21,23 @@ void Method(const FunctionCallbackInfo<Value>& args) {
       isolate, "Hola!", NewStringType::kNormal).ToLocalChecked());
 }
 
+void create_context(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+
+  //struct ftdi_context _ftdic;
+
+  //ftdi_init(&_ftdic);
+
+  //-- Crear el objeto con el contexto dentro
+  //FtdiContextWrapper::NewInstance(args);
+}
+
+
 void InitAll(Local<Object> exports) {
   FtdiContextWrapper::Init(exports);
   NODE_SET_METHOD(exports, "hello", Method);
+  NODE_SET_METHOD(exports, "create_context", create_context);
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, InitAll)
