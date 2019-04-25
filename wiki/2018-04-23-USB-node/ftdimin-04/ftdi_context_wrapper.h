@@ -1,7 +1,7 @@
-// myobject.h
 #ifndef FTDI_CONTEXT_WRAPPER_H
-#define WRAPPER_H
+#define FTDI_CONTEXT_WRAPPER_H
 
+#include <ftdi.h>
 #include <node.h>
 #include <node_object_wrap.h>
 
@@ -19,6 +19,7 @@ class FtdiContextWrapper : public node::ObjectWrap {
   static void PlusOne(const v8::FunctionCallbackInfo<v8::Value>& args);
   static v8::Persistent<v8::Function> constructor;
   double value_;
+  struct ftdi_context _ftdic;
 };
 
 }  // namespace demo

@@ -19,9 +19,11 @@ using v8::Value;
 Persistent<Function> FtdiContextWrapper::constructor;
 
 FtdiContextWrapper::FtdiContextWrapper(double value) : value_(value) {
+  ftdi_init(&_ftdic);
 }
 
 FtdiContextWrapper::~FtdiContextWrapper() {
+  ftdi_free(&_ftdic);
 }
 
 void FtdiContextWrapper::Init(Local<Object> exports) {
