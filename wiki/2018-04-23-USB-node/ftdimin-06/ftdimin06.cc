@@ -112,7 +112,6 @@ NODE_MODULE(NODE_GYP_MODULE_NAME, InitAll)
 
 //-- TODO
 
-//ftdi_usb_open(&mpsse_ftdic, 0x0403, 0x6010)
 //ftdi_usb_reset(&mpsse_ftdic)
 //ftdi_usb_purge_buffers(&mpsse_ftdic)
 //ftdi_get_latency_timer(&mpsse_ftdic, &mpsse_ftdi_latency)
