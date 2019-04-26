@@ -11,5 +11,6 @@ console.log("Estableciendo interfaz A");
 libftdi.ftdi_set_interface(ctx, 1);
 
 console.log("Abriendo dispositivo!")
-libftdi.ftdi_usb_open_desc(ctx, usbVendor, usbProduct, null, null);
+ret = libftdi.ftdi_usb_open(ctx, usbVendor, usbProduct);
 console.log(libftdi.ftdi_get_error_string(ctx));
+console.log("Operation code: " + ret)

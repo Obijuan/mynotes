@@ -29,6 +29,18 @@ void create_context(const FunctionCallbackInfo<Value>& args) {
   FtdiContextWrapper::NewInstance(args);
 }
 
+void ftdi_usb_open(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+  int vendor = args[1]->NumberValue();
+  int product = args[2]->NumberValue();
+
+  int ret = ftdi_usb_open(&ctx->_ftdic, vendor, product);
+
+  args.GetReturnValue().Set(ret);
+}
 
 void ftdi_usb_open_desc(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
@@ -88,6 +100,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "hello", Method);
   NODE_SET_METHOD(exports, "create_context", create_context);
   NODE_SET_METHOD(exports, "ftdi_usb_open_desc", ftdi_usb_open_desc);
+  NODE_SET_METHOD(exports, "ftdi_usb_open", ftdi_usb_open);
   NODE_SET_METHOD(exports, "ftdi_get_error_string", ftdi_get_error_string);
   NODE_SET_METHOD(exports, "ftdi_set_interface", ftdi_set_interface);
 }
