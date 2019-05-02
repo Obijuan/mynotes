@@ -13,6 +13,11 @@ const MC_READB_LOW = 0x81;   // Read Data bits LowByte
 const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
 const MC_SET_CLK_DIV = 0x86; // Set clock divisor
 
+const MC_DATA_IN  =  0x20 // When set read data (Data IN)
+const MC_DATA_OUT =  0x10 // When set write data (Data OUT)
+const MC_DATA_OCN = 0x01  // When set update data on negative clock edge
+const MC_DATA_BITS = 0x02 // When set count bits not bytes
+
 
 function mpsse_error(ret, msg) {
   console.log(msg);
@@ -116,6 +121,24 @@ function mpsse_set_gpio(gpio, direction)
 	mpsse_send_byte(direction); // Direction
 }
 
+function mpsse_xfer_spi_bits(data, n)
+{
+	if (n < 1)
+		return 0;
+
+	// Input and output, update data on negative edge read on positive, bits.
+	mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN | MC_DATA_BITS);
+	mpsse_send_byte(n - 1);
+	mpsse_send_byte(data);
+
+	return mpsse_recv_byte();
+}
+
+
+
+
+
+
 // ---------------------------------------------------------
 // Hardware specific CS, CReset, CDone functions
 // ---------------------------------------------------------
@@ -160,6 +183,24 @@ function flash_chip_deselect()
 	set_cs_creset(1, 0);
 }
 
+// FLASH chip select assert
+// should only happen while FPGA reset is asserted
+function flash_chip_select()
+{
+	set_cs_creset(0, 0);
+}
+
+function flash_reset()
+{
+  flash_chip_select();
+  mpsse_xfer_spi_bits(0xFF, 8);
+  flash_chip_deselect();
+
+  flash_chip_select();
+  mpsse_xfer_spi_bits(0xFF, 2);
+  flash_chip_deselect();
+}
+
 //------------------------- MAIN -------------------------------
 
 //-- Inicializar USB
@@ -181,12 +222,12 @@ sleep.usleep(250000);
 cdone = get_cdone()
 console.log("cdone: " + (cdone ? "high" : "low"))
 
+flash_reset()
+
 /*
 
 if (test_mode)
 	{
-
-		flash_reset();
 		flash_power_up();
 
 		flash_read_id();
@@ -201,18 +242,74 @@ if (test_mode)
   */
 
 /*
-  static void flash_reset()
+  static void flash_power_up()
   {
+  	uint8_t data_rpd[1] = { FC_RPD };
   	flash_chip_select();
-  	mpsse_xfer_spi_bits(0xFF, 8);
+  	mpsse_xfer_spi(data_rpd, 1);
   	flash_chip_deselect();
+  }*/
+
+/*
+  static void flash_read_id()
+  {
+  	* JEDEC ID structure:
+  	 * Byte No. | Data Type
+  	 * ---------+----------
+  	 *        0 | FC_JEDECID Request Command
+  	 *        1 | MFG ID
+  	 *        2 | Dev ID 1
+  	 *        3 | Dev ID 2
+  	 *        4 | Ext Dev Str Len
+  	 *
+
+  	uint8_t data[260] = { FC_JEDECID };
+  	int len = 5; // command + 4 response bytes
+
+  	if (verbose)
+  		fprintf(stderr, "read flash ID..\n");
 
   	flash_chip_select();
-  	mpsse_xfer_spi_bits(0xFF, 2);
+
+  	// Write command and read first 4 bytes
+  	mpsse_xfer_spi(data, len);
+
+  	if (data[4] == 0xFF)
+  		fprintf(stderr, "Extended Device String Length is 0xFF, "
+  				"this is likely a read error. Ignorig...\n");
+  	else {
+  		// Read extended JEDEC ID bytes
+  		if (data[4] != 0) {
+  			len += data[4];
+  			mpsse_xfer_spi(data + 5, len - 5);
+  		}
+  	}
+
+
   	flash_chip_deselect();
+
+  	// TODO: Add full decode of the JEDEC ID.
+  	fprintf(stderr, "flash ID:");
+  	for (int i = 1; i < len; i++)
+  		fprintf(stderr, " 0x%02X", data[i]);
+  	fprintf(stderr, "\n");
   }
+  */
+
+
+/*
+static void flash_power_down()
+{
+	uint8_t data[1] = { FC_PD };
+	flash_chip_select();
+	mpsse_xfer_spi(data, 1);
+	flash_chip_deselect();
+}
 */
 
+/*
+
+*/
 
 
 code = libftdi.ftdi_read_chipid(ctx)
