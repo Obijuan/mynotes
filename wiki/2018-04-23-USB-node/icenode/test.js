@@ -4,6 +4,14 @@ var libftdi = require('./build/Release/icenode')
 const usbVendor = 0x0403;
 const usbProduct = 0x6010;
 
+function mpsse_error(ret, msg) {
+  console.log(msg);
+  console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
+  console.log("Operation code: " + ret)
+  console.log("Abort.")
+  process.exit(1)
+}
+
 function mpsse_init(ctx) {
 
   libftdi.ftdi_set_interface(ctx, 1);
@@ -11,41 +19,24 @@ function mpsse_init(ctx) {
   //-- Abrir dispositivo
   ret = libftdi.ftdi_usb_open(ctx, usbVendor, usbProduct);
   if (ret) {
-    console.log("ERROR!!!")
-    console.log("No encontrado dispositivo: (0x" + usbVendor.toString(16) + ', 0x' + usbProduct.toString(16) + ')');
-    console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
-    console.log("Operation code: " + ret)
-    console.log("Abort.")
-    process.exit(1)
+    mpsse_error(ret, "No encontrado dispositivo: (0x" + usbVendor.toString(16) + ', 0x' + usbProduct.toString(16) + ')' )
   }
 
   //-- Reset
   ret = libftdi.ftdi_usb_reset(ctx)
   if (ret) {
-    console.log("Failed to reset iCE FTDI USB device")
-    console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
-    console.log("Operation code: " + ret)
-    console.log("Abort.")
-    process.exit(1)
+    mpsse_error(ret, "Failed to reset iCE FTDI USB device");
   }
 
   ret = libftdi.ftdi_usb_purge_buffers(ctx)
   if (ret) {
-    console.log("Failed to purge buffers on iCE FTDI USB device")
-    console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
-    console.log("Operation code: " + ret)
-    console.log("Abort.")
-    process.exit(1)
+    mpsse_error(ret, "Failed to purge buffers on iCE FTDI USB device")
   }
 
   var buf_latency = new Buffer.alloc(1);
   ret = libftdi.ftdi_get_latency_timer(ctx, buf_latency)
   if (ret) {
-    console.log("Failed to get latency timer")
-    console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
-    console.log("Operation code: " + ret)
-    console.log("Abort.")
-    process.exit(1)
+    mpsse_error(ret, "Failed to get latency timer");
   }
 
   var latency = buf_latency[0];
@@ -54,11 +45,7 @@ function mpsse_init(ctx) {
   // 1 is the fastest polling, it means 1 kHz polling
   ret = libftdi.ftdi_set_latency_timer(ctx, 1)
   if (ret) {
-    console.log("Failed to set latency timer")
-    console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
-    console.log("Operation code: " + ret)
-    console.log("Abort.")
-    process.exit(1)
+    mpsse_error(ret, "Failed to set latency timer")
   }
 
   /*
