@@ -1,4 +1,5 @@
 var libftdi = require('./build/Release/icenode')
+var sleep = require('sleep');
 
 // FTDI USB identifiers
 const usbVendor = 0x0403;
@@ -80,6 +81,37 @@ function mpsse_init(ctx) {
 	mpsse_send_byte(0x00);
 }
 
+function mpsse_recv_byte()
+{
+  var data = new Buffer.alloc(1);
+  while (1) {
+    let rc = libftdi.ftdi_read_data(ctx, data, 1);
+
+    if (rc < 0) {
+      mpsse_error(rc, "Read error")
+    }
+
+    if (rc == 1)
+      break;
+
+    sleep.uleep(100);
+  }
+
+  return data[0]
+}
+
+function mpsse_readb_low()
+{
+  mpsse_send_byte(MC_READB_LOW);
+  let data = mpsse_recv_byte();
+  return data;
+}
+
+function get_cdone()
+{
+  return (mpsse_readb_low() & 0x40) != 0;
+}
+
 //------------------------- MAIN -------------------------------
 
 //-- Inicializar USB
@@ -87,52 +119,8 @@ console.log("init..")
 var ctx = libftdi.create_context();
 mpsse_init(ctx);
 
-// fprintf(stderr, "cdone: %s\n", get_cdone() ? "high" : "low");
-
-/*
-static bool get_cdone(void)
-{
-	// ADBUS6 (GPIOL2)
-	return (mpsse_readb_low() & 0x40) != 0;
-}*/
-
-/*
-int mpsse_readb_low(void)
-{
-	uint8_t data;
-	mpsse_send_byte(MC_READB_LOW);
-	data = mpsse_recv_byte();
-	return data;
-}
-*/
-
-/*
-uint8_t mpsse_recv_byte()
-{
-	uint8_t data;
-	while (1) {
-		int rc = ftdi_read_data(&mpsse_ftdic, &data, 1);
-		if (rc < 0) {
-			fprintf(stderr, "Read error.\n");
-			mpsse_error(2);
-		}
-		if (rc == 1)
-			break;
-		usleep(100);
-	}
-	return data;
-}*/
-
-mpsse_send_byte(MC_READB_LOW);
-
-var data = new Buffer.alloc(1);
-var rc = libftdi.ftdi_read_data(ctx, data, 1);
-console.log("Bytes Leidos: " + rc)
-console.log("Data: " + data[0])
-
-
-
-console.log("Dispositivo Abierto...")
+let cdone = get_cdone()
+console.log("Cdone: " + (cdone ? "high" : "low"))
 
 code = libftdi.ftdi_read_chipid(ctx)
 console.log("Code: " + code.toString(16))
