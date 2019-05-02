@@ -160,6 +160,18 @@ void ftdi_get_latency_timer(const v8::FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(ret);
 }
 
+void ftdi_set_latency_timer(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+  int value = args[1]->NumberValue();
+
+  int ret = ftdi_set_latency_timer(&ctx->_ftdic, value);
+
+  args.GetReturnValue().Set(ret);
+}
+
 void InitAll(Local<Object> exports) {
   FtdiContextWrapper::Init(exports);
   NODE_SET_METHOD(exports, "hello", Method);
@@ -173,6 +185,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "ftdi_usb_reset", ftdi_usb_reset);
   NODE_SET_METHOD(exports, "ftdi_usb_purge_buffers", ftdi_usb_purge_buffers);
   NODE_SET_METHOD(exports, "ftdi_get_latency_timer", ftdi_get_latency_timer);
+  NODE_SET_METHOD(exports, "ftdi_set_latency_timer", ftdi_set_latency_timer);
 
 }
 
@@ -183,7 +196,6 @@ NODE_MODULE(NODE_GYP_MODULE_NAME, InitAll)
 
 //-- TODO
 
-//ftdi_set_latency_timer(&mpsse_ftdic, 1)
 //ftdi_set_bitmode(&mpsse_ftdic, 0xff, BITMODE_MPSSE)
 //int rc = ftdi_write_data(&mpsse_ftdic, &data, 1);
 //int rc = ftdi_read_data(&mpsse_ftdic, &data, 1);

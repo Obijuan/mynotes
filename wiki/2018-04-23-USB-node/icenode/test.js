@@ -51,15 +51,17 @@ function mpsse_init(ctx) {
   var latency = buf_latency[0];
   console.log("latency: "+latency)
 
+  // 1 is the fastest polling, it means 1 kHz polling
+  ret = libftdi.ftdi_set_latency_timer(ctx, 1)
+  if (ret) {
+    console.log("Failed to set latency timer")
+    console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
+    console.log("Operation code: " + ret)
+    console.log("Abort.")
+    process.exit(1)
+  }
+
   /*
-
-	//* 1 is the fastest polling, it means 1 kHz polling *
-	if (ftdi_set_latency_timer(&mpsse_ftdic, 1) < 0) {
-		fprintf(stderr, "Failed to set latency timer (%s).\n", ftdi_get_error_string(&mpsse_ftdic));
-		mpsse_error(2);
-	}
-
-	mpsse_ftdic_latency_set = true;
 
 	/* Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode. Set all pins to output. /
 	if (ftdi_set_bitmode(&mpsse_ftdic, 0xff, BITMODE_MPSSE) < 0) {
