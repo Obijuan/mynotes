@@ -127,9 +127,8 @@ mpsse_send_byte(MC_READB_LOW);
 
 var data = new Buffer.alloc(1);
 var rc = libftdi.ftdi_read_data(ctx, data, 1);
-console.log("Leido: " + rc)
-
-//--int rc = ftdi_read_data(&mpsse_ftdic, &data, 1);
+console.log("Bytes Leidos: " + rc)
+console.log("Data: " + data[0])
 
 
 
