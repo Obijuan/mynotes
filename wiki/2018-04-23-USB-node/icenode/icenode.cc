@@ -203,6 +203,20 @@ void ftdi_write_data(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(dataw);
 }
 
+void ftdi_read_data(const v8::FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+
+  unsigned char* data = (unsigned char*) node::Buffer::Data(args[1]);
+  size_t len = node::Buffer::Length(args[1]);
+  int size = (int) len;
+
+  int rc = ftdi_read_data(&ctx->_ftdic, data, len);
+
+  args.GetReturnValue().Set(rc);
+}
 
 
 void InitAll(Local<Object> exports) {
@@ -221,6 +235,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "ftdi_set_latency_timer", ftdi_set_latency_timer);
   NODE_SET_METHOD(exports, "ftdi_set_bitmode", ftdi_set_bitmode);
   NODE_SET_METHOD(exports, "ftdi_write_data", ftdi_write_data);
+  NODE_SET_METHOD(exports, "ftdi_read_data", ftdi_read_data);
 
 }
 
@@ -231,6 +246,4 @@ NODE_MODULE(NODE_GYP_MODULE_NAME, InitAll)
 
 //-- TODO
 
-//ftdi_set_bitmode(&mpsse_ftdic, 0xff, BITMODE_MPSSE)
-//int rc = ftdi_write_data(&mpsse_ftdic, &data, 1);
 //int rc = ftdi_read_data(&mpsse_ftdic, &data, 1);

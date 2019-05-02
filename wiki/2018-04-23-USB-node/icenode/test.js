@@ -6,8 +6,9 @@ const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
 
-const MC_TCK_D5 = 0x8B; // Enable /5 div, backward compat to FT2232D
-const MC_SET_CLK_DIV = 0x86; /* Set clock divisor */
+const MC_READB_LOW = 0x81;   // Read Data bits LowByte
+const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
+const MC_SET_CLK_DIV = 0x86; // Set clock divisor
 
 
 function mpsse_error(ret, msg) {
@@ -88,6 +89,50 @@ mpsse_init(ctx);
 
 // fprintf(stderr, "cdone: %s\n", get_cdone() ? "high" : "low");
 
+/*
+static bool get_cdone(void)
+{
+	// ADBUS6 (GPIOL2)
+	return (mpsse_readb_low() & 0x40) != 0;
+}*/
+
+/*
+int mpsse_readb_low(void)
+{
+	uint8_t data;
+	mpsse_send_byte(MC_READB_LOW);
+	data = mpsse_recv_byte();
+	return data;
+}
+*/
+
+/*
+uint8_t mpsse_recv_byte()
+{
+	uint8_t data;
+	while (1) {
+		int rc = ftdi_read_data(&mpsse_ftdic, &data, 1);
+		if (rc < 0) {
+			fprintf(stderr, "Read error.\n");
+			mpsse_error(2);
+		}
+		if (rc == 1)
+			break;
+		usleep(100);
+	}
+	return data;
+}*/
+
+mpsse_send_byte(MC_READB_LOW);
+
+var data = new Buffer.alloc(1);
+var rc = libftdi.ftdi_read_data(ctx, data, 1);
+console.log("Leido: " + rc)
+
+//--int rc = ftdi_read_data(&mpsse_ftdic, &data, 1);
+
+
+
 console.log("Dispositivo Abierto...")
 
 code = libftdi.ftdi_read_chipid(ctx)
@@ -95,10 +140,6 @@ console.log("Code: " + code.toString(16))
 
 
 /*
-
-
-
-
 // Buffer
 var buf = new Buffer.alloc(256);
 
