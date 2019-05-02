@@ -16,6 +16,16 @@ function mpsse_error(ret, msg) {
   process.exit(1)
 }
 
+function mpsse_send_byte(data)
+{
+  let buf = new Buffer.alloc(1);
+  buf[0] = data;
+  var rc = libftdi.ftdi_write_data(ctx, buf, 1)
+  if (rc != 1) {
+    mpsse_error(rc, "Write error (single byte, rc=" + rc + "expected 1)");
+  }
+}
+
 function mpsse_init(ctx) {
 
   libftdi.ftdi_set_interface(ctx, INTERFACE_A);
@@ -58,19 +68,8 @@ function mpsse_init(ctx) {
     mpsse_error(ret, "Failed to set BITMODE_MPSSE on iCE FTDI USB device")
   }
 
-  /*
-
 	// enable clock divide by 5
 	mpsse_send_byte(MC_TCK_D5);
-
-  */
-
-  var buf = new Buffer.alloc(1);
-  buf[0] = MC_TCK_D5;
-
-  //-- For implementing mpsse_send_byte()
-  var rc=libftdi.ftdi_write_data(ctx, buf, 1)
-  console.log("Bytes Written: " + rc)
 
   /*
 
@@ -89,6 +88,8 @@ function mpsse_init(ctx) {
   */
 
 }
+
+
 
 
 /*
