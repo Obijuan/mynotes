@@ -134,6 +134,17 @@ void ftdi_usb_reset(const v8::FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(ret);
 }
 
+void ftdi_usb_purge_buffers(const v8::FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+
+  int ret = ftdi_usb_purge_buffers(&ctx->_ftdic);
+
+  args.GetReturnValue().Set(ret);
+}
+
 void InitAll(Local<Object> exports) {
   FtdiContextWrapper::Init(exports);
   NODE_SET_METHOD(exports, "hello", Method);
@@ -145,6 +156,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "ftdi_read_chipid", ftdi_read_chipid);
   NODE_SET_METHOD(exports, "ftdi_read_eeprom_getsize", ftdi_read_eeprom_getsize);
   NODE_SET_METHOD(exports, "ftdi_usb_reset", ftdi_usb_reset);
+  NODE_SET_METHOD(exports, "ftdi_usb_purge_buffers", ftdi_usb_purge_buffers);
 
 }
 
@@ -155,7 +167,6 @@ NODE_MODULE(NODE_GYP_MODULE_NAME, InitAll)
 
 //-- TODO
 
-//ftdi_usb_purge_buffers(&mpsse_ftdic)
 //ftdi_get_latency_timer(&mpsse_ftdic, &mpsse_ftdi_latency)
 //ftdi_set_latency_timer(&mpsse_ftdic, 1)
 //ftdi_set_bitmode(&mpsse_ftdic, 0xff, BITMODE_MPSSE)

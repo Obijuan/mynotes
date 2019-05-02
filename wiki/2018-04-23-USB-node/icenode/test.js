@@ -29,13 +29,17 @@ function mpsse_init(ctx) {
     process.exit(1)
   }
 
+  ret = libftdi.ftdi_usb_purge_buffers(ctx)
+  if (ret) {
+    console.log("Failed to purge buffers on iCE FTDI USB device")
+    console.log("Error: " + libftdi.ftdi_get_error_string(ctx));
+    console.log("Operation code: " + ret)
+    console.log("Abort.")
+    process.exit(1)
+  }
 
 
   /*
-  if (ftdi_usb_purge_buffers(&mpsse_ftdic)) {
-		fprintf(stderr, "Failed to purge buffers on iCE FTDI USB device.\n");
-		mpsse_error(2);
-	}
 
 	if (ftdi_get_latency_timer(&mpsse_ftdic, &mpsse_ftdi_latency) < 0) {
 		fprintf(stderr, "Failed to get latency timer (%s).\n", ftdi_get_error_string(&mpsse_ftdic));
