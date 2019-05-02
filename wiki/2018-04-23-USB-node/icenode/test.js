@@ -4,6 +4,7 @@ var libftdi = require('./build/Release/icenode')
 const usbVendor = 0x0403;
 const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
+const INTERFACE_A   = 1;
 
 
 function mpsse_error(ret, msg) {
@@ -16,7 +17,7 @@ function mpsse_error(ret, msg) {
 
 function mpsse_init(ctx) {
 
-  libftdi.ftdi_set_interface(ctx, 1);
+  libftdi.ftdi_set_interface(ctx, INTERFACE_A);
 
   //-- Abrir dispositivo
   ret = libftdi.ftdi_usb_open(ctx, usbVendor, usbProduct);
