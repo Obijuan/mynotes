@@ -7,6 +7,8 @@ const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
 
+/* Mode commands */
+const	MC_SETB_LOW = 0x80;    // Set Data bits LowByte
 const MC_READB_LOW = 0x81;   // Read Data bits LowByte
 const MC_TCK_D5 = 0x8B;      // Enable /5 div, backward compat to FT2232D
 const MC_SET_CLK_DIV = 0x86; // Set clock divisor
@@ -107,9 +109,55 @@ function mpsse_readb_low()
   return data;
 }
 
+function mpsse_set_gpio(gpio, direction)
+{
+	mpsse_send_byte(MC_SETB_LOW);
+	mpsse_send_byte(gpio); // Value
+	mpsse_send_byte(direction); // Direction
+}
+
+// ---------------------------------------------------------
+// Hardware specific CS, CReset, CDone functions
+// ---------------------------------------------------------
+
 function get_cdone()
 {
   return (mpsse_readb_low() & 0x40) != 0;
+}
+
+function set_cs_creset(cs_b, creset_b)
+{
+  let gpio = 0;
+  const direction = 0x93;
+
+  if (cs_b) {
+    // ADBUS4 (GPIOL0)
+    gpio |= 0x10;
+  }
+
+  if (creset_b) {
+    // ADBUS7 (GPIOL3)
+    gpio |= 0x80;
+  }
+
+  mpsse_set_gpio(gpio, direction);
+}
+
+// ---------------------------------------------------------
+// FLASH function implementations
+// ---------------------------------------------------------
+
+
+// the FPGA reset is released so also FLASH chip select should be deasserted
+function flash_release_reset()
+{
+  set_cs_creset(1, 1);
+}
+
+// FLASH chip select deassert
+function flash_chip_deselect()
+{
+	set_cs_creset(1, 0);
 }
 
 //------------------------- MAIN -------------------------------
@@ -121,6 +169,51 @@ mpsse_init(ctx);
 
 let cdone = get_cdone()
 console.log("Cdone: " + (cdone ? "high" : "low"))
+
+flash_release_reset();
+sleep.usleep(100000);
+
+//-- Test Mode
+console.log("reset..")
+flash_chip_deselect();
+sleep.usleep(250000);
+
+cdone = get_cdone()
+console.log("cdone: " + (cdone ? "high" : "low"))
+
+/*
+
+if (test_mode)
+	{
+
+		flash_reset();
+		flash_power_up();
+
+		flash_read_id();
+
+		flash_power_down();
+
+		flash_release_reset();
+		usleep(250000);
+
+		fprintf(stderr, "cdone: %s\n", get_cdone() ? "high" : "low");
+	}
+  */
+
+/*
+  static void flash_reset()
+  {
+  	flash_chip_select();
+  	mpsse_xfer_spi_bits(0xFF, 8);
+  	flash_chip_deselect();
+
+  	flash_chip_select();
+  	mpsse_xfer_spi_bits(0xFF, 2);
+  	flash_chip_deselect();
+  }
+*/
+
+
 
 code = libftdi.ftdi_read_chipid(ctx)
 console.log("Code: " + code.toString(16))
