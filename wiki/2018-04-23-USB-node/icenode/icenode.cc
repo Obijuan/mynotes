@@ -145,6 +145,21 @@ void ftdi_usb_purge_buffers(const v8::FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(ret);
 }
 
+void ftdi_get_latency_timer(const v8::FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+
+  //-- Seguro que hay forma mejor de hacerlo... para devolver el valor
+  //-- numerico de la latencia utilizo un buffer...
+
+  unsigned char* mpsse_ftdi_latency = (unsigned char*) node::Buffer::Data(args[1]);
+  int ret = ftdi_get_latency_timer(&ctx->_ftdic, mpsse_ftdi_latency);
+
+  args.GetReturnValue().Set(ret);
+}
+
 void InitAll(Local<Object> exports) {
   FtdiContextWrapper::Init(exports);
   NODE_SET_METHOD(exports, "hello", Method);
@@ -157,6 +172,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "ftdi_read_eeprom_getsize", ftdi_read_eeprom_getsize);
   NODE_SET_METHOD(exports, "ftdi_usb_reset", ftdi_usb_reset);
   NODE_SET_METHOD(exports, "ftdi_usb_purge_buffers", ftdi_usb_purge_buffers);
+  NODE_SET_METHOD(exports, "ftdi_get_latency_timer", ftdi_get_latency_timer);
 
 }
 
@@ -167,7 +183,6 @@ NODE_MODULE(NODE_GYP_MODULE_NAME, InitAll)
 
 //-- TODO
 
-//ftdi_get_latency_timer(&mpsse_ftdic, &mpsse_ftdi_latency)
 //ftdi_set_latency_timer(&mpsse_ftdic, 1)
 //ftdi_set_bitmode(&mpsse_ftdic, 0xff, BITMODE_MPSSE)
 //int rc = ftdi_write_data(&mpsse_ftdic, &data, 1);
