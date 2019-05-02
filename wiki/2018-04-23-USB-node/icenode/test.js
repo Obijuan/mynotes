@@ -5,6 +5,7 @@ const usbVendor = 0x0403;
 const usbProduct = 0x6010;
 const BITMODE_MPSSE  = 0x02;
 const INTERFACE_A   = 1;
+const MC_TCK_D5 = 0x8B; // Enable /5 div, backward compat to FT2232D
 
 
 function mpsse_error(ret, msg) {
@@ -62,6 +63,17 @@ function mpsse_init(ctx) {
 	// enable clock divide by 5
 	mpsse_send_byte(MC_TCK_D5);
 
+  */
+
+  var buf = new Buffer.alloc(1);
+  buf[0] = MC_TCK_D5;
+
+  //-- For implementing mpsse_send_byte()
+  var rc=libftdi.ftdi_write_data(ctx, buf, 1)
+  console.log("Bytes Written: " + rc)
+
+  /*
+
 	if (slow_clock) {
 		// set 50 kHz clock
 		mpsse_send_byte(MC_SET_CLK_DIV);
@@ -78,6 +90,17 @@ function mpsse_init(ctx) {
 
 }
 
+
+/*
+void mpsse_send_byte(uint8_t data)
+{
+	int rc = ftdi_write_data(&mpsse_ftdic, &data, 1);
+	if (rc != 1) {
+		fprintf(stderr, "Write error (single byte, rc=%d, expected %d).\n", rc, 1);
+		mpsse_error(2);
+	}
+}
+*/
 
 //--- Inicializar USB
 console.log("init..")

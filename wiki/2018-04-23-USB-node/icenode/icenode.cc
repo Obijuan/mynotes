@@ -184,9 +184,26 @@ void ftdi_set_bitmode(const FunctionCallbackInfo<Value>& args) {
   ftdi_mpsse_mode mode = static_cast<ftdi_mpsse_mode>(ftdi_mode);
 
   int ret = ftdi_set_bitmode(&ctx->_ftdic, bitmask, static_cast<ftdi_mpsse_mode>(mode));
-  
+
   args.GetReturnValue().Set(ret);
 }
+
+void ftdi_write_data(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+
+  unsigned char* buf = (unsigned char*) node::Buffer::Data(args[1]);
+  size_t len = node::Buffer::Length(args[1]);
+  int size = (int) len;
+
+  int dataw = ftdi_write_data(&ctx->_ftdic, buf, len);
+
+  args.GetReturnValue().Set(dataw);
+}
+
+
 
 void InitAll(Local<Object> exports) {
   FtdiContextWrapper::Init(exports);
@@ -203,6 +220,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "ftdi_get_latency_timer", ftdi_get_latency_timer);
   NODE_SET_METHOD(exports, "ftdi_set_latency_timer", ftdi_set_latency_timer);
   NODE_SET_METHOD(exports, "ftdi_set_bitmode", ftdi_set_bitmode);
+  NODE_SET_METHOD(exports, "ftdi_write_data", ftdi_write_data);
 
 }
 
