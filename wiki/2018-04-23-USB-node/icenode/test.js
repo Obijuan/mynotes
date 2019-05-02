@@ -3,6 +3,8 @@ var libftdi = require('./build/Release/icenode')
 // FTDI USB identifiers
 const usbVendor = 0x0403;
 const usbProduct = 0x6010;
+const BITMODE_MPSSE  = 0x02;
+
 
 function mpsse_error(ret, msg) {
   console.log(msg);
@@ -48,13 +50,13 @@ function mpsse_init(ctx) {
     mpsse_error(ret, "Failed to set latency timer")
   }
 
-  /*
+  // Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode. Set all pins to output
+  ret = libftdi.ftdi_set_bitmode(ctx, 0xFF, BITMODE_MPSSE);
+  if (ret) {
+    mpsse_error(ret, "Failed to set BITMODE_MPSSE on iCE FTDI USB device")
+  }
 
-	/* Enter MPSSE (Multi-Protocol Synchronous Serial Engine) mode. Set all pins to output. /
-	if (ftdi_set_bitmode(&mpsse_ftdic, 0xff, BITMODE_MPSSE) < 0) {
-		fprintf(stderr, "Failed to set BITMODE_MPSSE on iCE FTDI USB device.\n");
-		mpsse_error(2);
-	}
+  /*
 
 	// enable clock divide by 5
 	mpsse_send_byte(MC_TCK_D5);
