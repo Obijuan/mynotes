@@ -18,6 +18,16 @@ const MC_DATA_OUT =  0x10 // When set write data (Data OUT)
 const MC_DATA_OCN = 0x01  // When set update data on negative clock edge
 const MC_DATA_BITS = 0x02 // When set count bits not bytes
 
+// ---------------------------------------------------------
+// FLASH definitions
+// ---------------------------------------------------------
+
+// Flash command definitions
+// This command list is based on the Winbond W25Q128JV Datasheet
+
+const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
+const FC_JEDECID = 0x9F; // Read JEDEC ID
+
 
 function mpsse_error(ret, msg) {
   console.log(msg);
@@ -134,9 +144,24 @@ function mpsse_xfer_spi_bits(data, n)
 	return mpsse_recv_byte();
 }
 
+function mpsse_xfer_spi(data, n)
+{
+	if (n < 1)
+		return;
 
+	/* Input and output, update data on negative edge read on positive. */
+	mpsse_send_byte(MC_DATA_IN | MC_DATA_OUT | MC_DATA_OCN);
+	mpsse_send_byte(n - 1);
+	mpsse_send_byte((n - 1) >> 8);
 
+	let rc = libftdi.ftdi_write_data(ctx, data, n);
+	if (rc != n) {
+    mpsse_error(rc, "Write error (chunk, rc=" + rc + ", expected  " + n + ")");
+	}
 
+	for (i = 0; i < n; i++)
+		data[i] = mpsse_recv_byte();
+}
 
 
 // ---------------------------------------------------------
@@ -201,6 +226,63 @@ function flash_reset()
   flash_chip_deselect();
 }
 
+function flash_power_up()
+{
+  let data = new Buffer.alloc(1);
+  data[0] = FC_RPD;
+  flash_chip_select();
+  mpsse_xfer_spi(data, 1);
+  flash_chip_deselect();
+}
+
+function flash_read_id()
+{
+  /* JEDEC ID structure:
+   * Byte No. | Data Type
+   * ---------+----------
+   *        0 | FC_JEDECID Request Command
+   *        1 | MFG ID
+   *        2 | Dev ID 1
+   *        3 | Dev ID 2
+   *        4 | Ext Dev Str Len
+   */
+
+   let data = new Buffer.alloc(5);
+   data[0] = FC_JEDECID;
+   let len = 5; // command + 4 response bytes
+
+   console.log("read flash ID..");
+   flash_chip_select();
+
+   // Write command and read first 4 bytes
+   mpsse_xfer_spi(data, len);
+
+   if (data[4] == 0xFF)
+     console.log("Extended Device String Length is 0xFF, " +
+                 "this is likely a read error. Ignorig...");
+
+   //-- code for reading the extended (not implemented yet)
+   /*
+   else {
+     // Read extended JEDEC ID bytes
+     if (data[4] != 0) {
+       len += data[4];
+       mpsse_xfer_spi(data + 5, len - 5);
+     }
+   }*/
+
+   flash_chip_deselect();
+
+   // TODO: Add full decode of the JEDEC ID.
+   let flash_id_str = "flash ID: ";
+   for (let i = 1; i < len; i++)
+     flash_id_str += " 0x" + data[i].toString(16);
+
+   console.log(flash_id_str);
+
+}
+
+
 //------------------------- MAIN -------------------------------
 
 //-- Inicializar USB
@@ -224,13 +306,16 @@ console.log("cdone: " + (cdone ? "high" : "low"))
 
 flash_reset()
 
+flash_power_up()
+
+flash_read_id();
+
+
 /*
 
 if (test_mode)
 	{
-		flash_power_up();
 
-		flash_read_id();
 
 		flash_power_down();
 
@@ -239,61 +324,6 @@ if (test_mode)
 
 		fprintf(stderr, "cdone: %s\n", get_cdone() ? "high" : "low");
 	}
-  */
-
-/*
-  static void flash_power_up()
-  {
-  	uint8_t data_rpd[1] = { FC_RPD };
-  	flash_chip_select();
-  	mpsse_xfer_spi(data_rpd, 1);
-  	flash_chip_deselect();
-  }*/
-
-/*
-  static void flash_read_id()
-  {
-  	* JEDEC ID structure:
-  	 * Byte No. | Data Type
-  	 * ---------+----------
-  	 *        0 | FC_JEDECID Request Command
-  	 *        1 | MFG ID
-  	 *        2 | Dev ID 1
-  	 *        3 | Dev ID 2
-  	 *        4 | Ext Dev Str Len
-  	 *
-
-  	uint8_t data[260] = { FC_JEDECID };
-  	int len = 5; // command + 4 response bytes
-
-  	if (verbose)
-  		fprintf(stderr, "read flash ID..\n");
-
-  	flash_chip_select();
-
-  	// Write command and read first 4 bytes
-  	mpsse_xfer_spi(data, len);
-
-  	if (data[4] == 0xFF)
-  		fprintf(stderr, "Extended Device String Length is 0xFF, "
-  				"this is likely a read error. Ignorig...\n");
-  	else {
-  		// Read extended JEDEC ID bytes
-  		if (data[4] != 0) {
-  			len += data[4];
-  			mpsse_xfer_spi(data + 5, len - 5);
-  		}
-  	}
-
-
-  	flash_chip_deselect();
-
-  	// TODO: Add full decode of the JEDEC ID.
-  	fprintf(stderr, "flash ID:");
-  	for (int i = 1; i < len; i++)
-  		fprintf(stderr, " 0x%02X", data[i]);
-  	fprintf(stderr, "\n");
-  }
   */
 
 
