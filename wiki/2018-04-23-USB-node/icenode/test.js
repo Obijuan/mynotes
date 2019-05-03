@@ -27,6 +27,7 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
+const FC_PD = 0xB9; // Power-down
 
 
 function mpsse_error(ret, msg) {
@@ -235,6 +236,15 @@ function flash_power_up()
   flash_chip_deselect();
 }
 
+function flash_power_down()
+{
+  let data = new Buffer.alloc(1);
+  data[0] = FC_PD;
+	flash_chip_select();
+	mpsse_xfer_spi(data, 1);
+	flash_chip_deselect();
+}
+
 function flash_read_id()
 {
   /* JEDEC ID structure:
@@ -283,12 +293,40 @@ function flash_read_id()
 }
 
 
+//-- Read the Flash ID, for testing purposes
+function test_mode()
+{
+  console.log("---> TEST MODE")
+  console.log("reset..")
+  flash_chip_deselect();
+  sleep.usleep(250000);
+
+  cdone = get_cdone()
+  console.log("cdone: " + (cdone ? "high" : "low"))
+
+  flash_reset()
+
+  flash_power_up()
+
+  flash_read_id();
+
+  flash_power_down();
+
+  flash_release_reset();
+  sleep.usleep(250000);
+  console.log("cdone: " + (cdone ? "high" : "low"))
+}
+
 //------------------------- MAIN -------------------------------
 
 //-- Inicializar USB
 console.log("init..")
 var ctx = libftdi.create_context();
 mpsse_init(ctx);
+
+//-- Test: Read FTDI chip id
+code = libftdi.ftdi_read_chipid(ctx)
+console.log("FTDI ID Code: " + code.toString(16))
 
 let cdone = get_cdone()
 console.log("Cdone: " + (cdone ? "high" : "low"))
@@ -297,53 +335,9 @@ flash_release_reset();
 sleep.usleep(100000);
 
 //-- Test Mode
-console.log("reset..")
-flash_chip_deselect();
-sleep.usleep(250000);
-
-cdone = get_cdone()
-console.log("cdone: " + (cdone ? "high" : "low"))
-
-flash_reset()
-
-flash_power_up()
-
-flash_read_id();
+test_mode()
 
 
-/*
-
-if (test_mode)
-	{
-
-
-		flash_power_down();
-
-		flash_release_reset();
-		usleep(250000);
-
-		fprintf(stderr, "cdone: %s\n", get_cdone() ? "high" : "low");
-	}
-  */
-
-
-/*
-static void flash_power_down()
-{
-	uint8_t data[1] = { FC_PD };
-	flash_chip_select();
-	mpsse_xfer_spi(data, 1);
-	flash_chip_deselect();
-}
-*/
-
-/*
-
-*/
-
-
-code = libftdi.ftdi_read_chipid(ctx)
-console.log("Code: " + code.toString(16))
 
 
 /*
