@@ -29,6 +29,7 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 const FC_WE = 0x06;  // Write Enable
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
+const FC_PP = 0x02; // Page Program
 const FC_PD = 0xB9; // Power-down
 const FC_RSR1 = 0x05; // Read Status Register 1
 const FC_BE64 = 0xD8; // Block Erase 64kb
@@ -377,10 +378,10 @@ function flash_64kB_sector_erase(addr)
 	console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
 
   let command = new Buffer.alloc(4);
-  data[0] = FC_BE64;
-  data[1] = (addr >> 16);
-  data[2] = (addr >> 8);
-  data[3] = addr;
+  command[0] = FC_BE64;
+  command[1] = (addr >> 16);
+  command[2] = (addr >> 8);
+  command[3] = addr;
 
 	flash_chip_select();
 	mpsse_send_spi(command, 4);
@@ -454,6 +455,30 @@ function flash_wait(verbose)
   }
 }
 
+function flash_prog(addr, data, n, verbose)
+{
+	if (verbose)
+		console.log("prog 0x" + addr.toString(16) + " 0x" + n.toString(16));
+
+  let command = new Buffer.alloc(4);
+  command[0] = FC_PP;
+  command[1] = (addr >> 16);
+  command[2] = (addr >> 8);
+  command[3] = addr;
+
+	flash_chip_select();
+	mpsse_send_spi(command, 4);
+	mpsse_send_spi(data, n);
+	flash_chip_deselect();
+
+	if (verbose) {
+    let str = ""
+		for (let i = 0; i < n; i++)
+			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
+    console.log(str);
+  }
+}
+
 //-- Read the Flash ID, for testing purposes
 function test_mode()
 {
@@ -502,11 +527,11 @@ sleep.usleep(100000);
 
 //-- Open the bitstream file
 const BITSTREAM_FILE = 'test.bin'
-var data = fs.readFileSync(BITSTREAM_FILE)
+let bitstream_data = fs.readFileSync(BITSTREAM_FILE)
 console.log("Filename: " + BITSTREAM_FILE)
-var file_size = data.length
+var file_size = bitstream_data.length
 console.log("Length: " + file_size)
-console.log (data)
+console.log (bitstream_data)
 
 console.log("reset..");
 flash_chip_deselect();
@@ -523,38 +548,54 @@ flash_read_id();
 // ---------------------------------------------------------
 console.log("Length: " + file_size)
 
-var rw_offset = 0;
+let rw_offset = 0;
 
 //-- Flash erase
-var verbose = false;
+let verbose = false;
 
-var begin_addr = rw_offset & ~0xffff;
-var end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
+let begin_addr = rw_offset & ~0xffff;
+let end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
-for (addr = begin_addr; addr < end_addr; addr += 0x10000) {
+for (let addr = begin_addr; addr < end_addr; addr += 0x10000) {
   flash_write_enable(verbose);
   flash_64kB_sector_erase(addr);
   if (verbose)
     console.log("Status after block erase:");
-  var status = flash_read_status()
+  let status = flash_read_status()
   if (verbose)
     flash_print_status(status)
   flash_wait(verbose);
 }
 
+console.log("programming..")
 
-/*
-					for (int addr = begin_addr; addr < end_addr; addr += 0x10000) {
-						flash_write_enable();
-						flash_64kB_sector_erase(addr);
-						if (verbose) {
-							fprintf(stderr, "Status after block erase:\n");
-							flash_read_status();
-						}
-						flash_wait();
-					}
-*/
+let addr = 0;
+let total_blocks = Math.trunc(file_size / 256);
+let remaining = Math.trunc(file_size % 256);
 
+console.log("Total 256 bytes blocks: " + total_blocks)
+
+//-- Write complete blocks
+for (let b = 0; b < total_blocks; b++) {
+  let buf = bitstream_data.slice(addr, addr + 256);
+  //console.log("Bloque: " + b + ". Size: " + buf.length);
+
+  flash_write_enable();
+  flash_prog(rw_offset + addr, buf, 256, true);
+  flash_wait();
+
+  addr += 256;
+}
+
+//-- Write the remaining not full block
+if (remaining > 0) {
+  let buf = bitstream_data.slice(addr, addr + remaining);
+  flash_write_enable();
+  flash_prog(rw_offset + addr, buf, remaining, true);
+  flash_wait();
+}
+//console.log(buf)
+//console.log("Lenght: " + buf.length)
 
 
 /*
