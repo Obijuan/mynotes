@@ -1,0 +1,11 @@
+{
+  "name": "icelectron",
+  "version": "0.1.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^5.0.0"
+  }
+}
