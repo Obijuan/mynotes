@@ -31,6 +31,7 @@ const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
 const FC_PD = 0xB9; // Power-down
 const FC_RSR1 = 0x05; // Read Status Register 1
+const FC_BE64 = 0xD8; // Block Erase 64kb
 
 
 function mpsse_error(ret, msg) {
@@ -166,6 +167,41 @@ function mpsse_xfer_spi(data, n)
 	for (i = 0; i < n; i++)
 		data[i] = mpsse_recv_byte();
 }
+
+function mpsse_send_spi(data, n)
+{
+	if (n < 1)
+		return;
+
+	// Output only, update data on negative clock edge.
+	mpsse_send_byte(MC_DATA_OUT | MC_DATA_OCN);
+	mpsse_send_byte(n - 1);
+	mpsse_send_byte((n - 1) >> 8);
+
+	let rc = libftdi.ftdi_write_data(ctx, data, n);
+	if (rc != n) {
+		mpsse_error(rc, "Write error (chunk, rc=" + rc + ", expected " + n + ")", rc, n);
+	}
+}
+
+/*
+void mpsse_send_spi(uint8_t *data, int n)
+{
+	if (n < 1)
+		return;
+
+	// Output only, update data on negative clock edge.
+	mpsse_send_byte(MC_DATA_OUT | MC_DATA_OCN);
+	mpsse_send_byte(n - 1);
+	mpsse_send_byte((n - 1) >> 8);
+
+	int rc = ftdi_write_data(&mpsse_ftdic, data, n);
+	if (rc != n) {
+		fprintf(stderr, "Write error (chunk, rc=%d, expected %d).\n", rc, n);
+		mpsse_error(2);
+	}
+}
+*/
 
 
 // ---------------------------------------------------------
@@ -336,6 +372,21 @@ function flash_write_enable(verbose)
 }
 
 
+function flash_64kB_sector_erase(addr)
+{
+	console.log("erase 64kB sector at 0x" + addr.toString(16) + "..");
+
+  let command = new Buffer.alloc(4);
+  data[0] = FC_BE64;
+  data[1] = (addr >> 16);
+  data[2] = (addr >> 8);
+  data[3] = addr;
+
+	flash_chip_select();
+	mpsse_send_spi(command, 4);
+	flash_chip_deselect();
+}
+
 
 function flash_print_status(status)
 {
@@ -363,9 +414,45 @@ function flash_print_status(status)
 
   console.log(" -  SWP: " + spm);
   console.log(" -  WEL: " + (((status & (1 << 1)) == 0) ? "Not write enabled" : "Write enabled"));
-  console.log(" - ~RDY: " + (((status & (1 << 0)) == 0) ? "Ready" : "Busy"));
+  console.log(" - ~RDY: " + (((status & 0x1) == 0) ? "Ready" : "Busy"));
 }
 
+function flash_wait(verbose)
+{
+  if (verbose)
+    console.log("waiting..");
+  var count = 0;
+  while (1)
+  {
+    let data = new Buffer.alloc(2);
+    data[0] = FC_RSR1;
+
+    flash_chip_select();
+    mpsse_xfer_spi(data, 2);
+    flash_chip_deselect();
+
+    if ((data[1] & 0x01) == 0) {
+      if (count < 2) {
+        count++;
+        if (verbose) {
+          console.log("r");
+        }
+      } else {
+        if (verbose) {
+          console.log("R");
+        }
+        break;
+      }
+    } else {
+      if (verbose) {
+        console.log(".");
+      }
+      count = 0;
+    }
+
+    sleep.usleep(1000);
+  }
+}
 
 //-- Read the Flash ID, for testing purposes
 function test_mode()
@@ -438,18 +525,22 @@ console.log("Length: " + file_size)
 
 var rw_offset = 0;
 
+//-- Flash erase
+var verbose = false;
+
 var begin_addr = rw_offset & ~0xffff;
 var end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
-//-- Test
-let addr = begin_addr;
-flash_write_enable(true);
-
-//-- Test
-//var status = flash_read_status();
-//console.log("Status: " + status.toString(16));
-
-//flash_print_status(status)
+for (addr = begin_addr; addr < end_addr; addr += 0x10000) {
+  flash_write_enable(verbose);
+  flash_64kB_sector_erase(addr);
+  if (verbose)
+    console.log("Status after block erase:");
+  var status = flash_read_status()
+  if (verbose)
+    flash_print_status(status)
+  flash_wait(verbose);
+}
 
 
 /*
@@ -462,29 +553,6 @@ flash_write_enable(true);
 						}
 						flash_wait();
 					}
-*/
-
-/*
-static void flash_write_enable()
-{
-	if (verbose) {
-		fprintf(stderr, "status before enable:\n");
-		flash_read_status();
-	}
-
-	if (verbose)
-		fprintf(stderr, "write enable..\n");
-
-	uint8_t data[1] = { FC_WE };
-	flash_chip_select();
-	mpsse_xfer_spi(data, 1);
-	flash_chip_deselect();
-
-	if (verbose) {
-		fprintf(stderr, "status after enable:\n");
-		flash_read_status();
-	}
-}
 */
 
 
