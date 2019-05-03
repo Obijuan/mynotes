@@ -8,10 +8,14 @@ electron.app.on('ready', ()=>{
   console.log("Evento Ready!")
 
   // Crear la ventana principal de nuestra Interfaz Gráfica
-  win = new electron.BrowserWindow({
+  let win = new electron.BrowserWindow({
     width: 300,
-    height: 200
+    height: 200,
+    //resizable: false,
+    icon: './app/icelectron-icon.png',
   })
 
-  win.setMenuBarVisibility(false)
+  //win.setMenuBarVisibility(false)
+  process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+  win.loadURL(`file://${__dirname}/app/index.html`)
 })
