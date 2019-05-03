@@ -30,6 +30,7 @@ const FC_WE = 0x06;  // Write Enable
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
 const FC_PP = 0x02; // Page Program
+const FC_RD = 0x03; // Read Data
 const FC_PD = 0xB9; // Power-down
 const FC_RSR1 = 0x05; // Read Status Register 1
 const FC_BE64 = 0xD8; // Block Erase 64kb
@@ -319,6 +320,60 @@ function flash_read_id()
 }
 
 
+function flash_read(addr, data, n, verbose)
+{
+	if (verbose)
+    console.log("read 0x" + addr.toString(16) + " 0x" + n.toString(16));
+
+  let command = new Buffer.alloc(4);
+  command[0] = FC_RD;
+  command[1] = (addr >> 16);
+  command[2] = (addr >> 8);
+  command[3] = addr;
+
+	flash_chip_select();
+	mpsse_send_spi(command, 4);
+	//memset(data, 0, n);
+	mpsse_xfer_spi(data, n);
+	flash_chip_deselect();
+
+  if (verbose) {
+    let str = ""
+		for (let i = 0; i < n; i++)
+			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
+    console.log(str);
+  }
+}
+
+function flash_prog(addr, data, n, verbose)
+{
+	if (verbose)
+		console.log("prog 0x" + addr.toString(16) + " 0x" + n.toString(16));
+
+  let command = new Buffer.alloc(4);
+  command[0] = FC_PP;
+  command[1] = (addr >> 16);
+  command[2] = (addr >> 8);
+  command[3] = addr;
+
+	flash_chip_select();
+	mpsse_send_spi(command, 4);
+	mpsse_send_spi(data, n);
+	flash_chip_deselect();
+
+	if (verbose) {
+    let str = ""
+		for (let i = 0; i < n; i++)
+			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
+    console.log(str);
+  }
+}
+
+
+
+
+
+
 function flash_read_status()
 {
   let data = new Buffer.alloc(2);
@@ -441,30 +496,6 @@ function flash_wait(verbose)
   }
 }
 
-function flash_prog(addr, data, n, verbose)
-{
-	if (verbose)
-		console.log("prog 0x" + addr.toString(16) + " 0x" + n.toString(16));
-
-  let command = new Buffer.alloc(4);
-  command[0] = FC_PP;
-  command[1] = (addr >> 16);
-  command[2] = (addr >> 8);
-  command[3] = addr;
-
-	flash_chip_select();
-	mpsse_send_spi(command, 4);
-	mpsse_send_spi(data, n);
-	flash_chip_deselect();
-
-	if (verbose) {
-    let str = ""
-		for (let i = 0; i < n; i++)
-			str += data[i].toString(16) + (i == n - 1 || i % 32 == 31 ? '\n' : ' ');
-    console.log(str);
-  }
-}
-
 //-- Read the Flash ID, for testing purposes
 function test_mode()
 {
@@ -518,7 +549,6 @@ let bitstream_data = fs.readFileSync(BITSTREAM_FILE)
 console.log("Filename: " + BITSTREAM_FILE)
 var file_size = bitstream_data.length
 console.log("Length: " + file_size)
-console.log (bitstream_data)
 
 console.log("reset..");
 flash_chip_deselect();
@@ -568,7 +598,7 @@ for (let b = 0; b < total_blocks; b++) {
   //console.log("Bloque: " + b + ". Size: " + buf.length);
 
   flash_write_enable();
-  flash_prog(rw_offset + addr, buf, 256, true);
+  flash_prog(rw_offset + addr, buf, 256, false);
   flash_wait();
 
   addr += 256;
@@ -578,26 +608,35 @@ for (let b = 0; b < total_blocks; b++) {
 if (remaining > 0) {
   let buf = bitstream_data.slice(addr, addr + remaining);
   flash_write_enable();
-  flash_prog(rw_offset + addr, buf, remaining, true);
+  flash_prog(rw_offset + addr, buf, remaining, false);
   flash_wait();
 }
 
-/*
-fprintf(stderr, "reading.. for verification\n");
-			for (int addr = 0; true; addr += 256) {
-				uint8_t buffer_flash[256], buffer_file[256];
-				int rc = fread(buffer_file, 1, 256, f);
-				if (rc <= 0)
-					break;
-				flash_read(rw_offset + addr, buffer_flash, rc);
-				if (memcmp(buffer_file, buffer_flash, rc)) {
-					fprintf(stderr, "Found difference between flash and file!\n");
-					mpsse_error(3);
-				}
-			}
+//-----------------------------------------------------------
+//   VERYFICATION
+//-----------------------------------------------------------
 
-			fprintf(stderr, "VERIFY OK\n");
-*/
+console.log("reading.. for verification");
+addr = 0;
+let buf_flash = new Buffer.alloc(256);
+
+//-- Verify complete blocks
+for (let b = 0; b < total_blocks; b++) {
+  let buf_file = bitstream_data.slice(addr, addr + 256);
+  flash_read(rw_offset + addr, buf_flash, 256, false);
+  if (!buf_flash.equals(buf_file))
+    mpsse_error(3, "Found difference between flash and file!")
+  addr += 256;
+}
+//-- Verify the remaining block
+if (remaining > 0) {
+  let buf_file = bitstream_data.slice(addr, addr + remaining);
+  let buf_flash = new Buffer.alloc(remaining);
+
+  flash_read(rw_offset + addr, buf_flash, remaining, false);
+  if (!buf_flash.equals(buf_file))
+    mpsse_error(3, "Found difference between flash and file!")
+}
 
 
 // ---------------------------------------------------------
