@@ -1,3 +1,4 @@
+var fs = require('fs');
 var libftdi = require('./build/Release/icenode')
 var sleep = require('sleep');
 
@@ -28,6 +29,7 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
 const FC_PD = 0xB9; // Power-down
+const FC_RSR1 = 0x05; // Read Status Register 1
 
 
 function mpsse_error(ret, msg) {
@@ -293,6 +295,50 @@ function flash_read_id()
 }
 
 
+function flash_read_status()
+{
+  let data = new Buffer.alloc(2);
+  data[0] = FC_RSR1;
+
+  flash_chip_select();
+  mpsse_xfer_spi(data, 2);
+  flash_chip_deselect();
+
+  sleep.usleep(1000);
+
+	return data[1];
+}
+
+function flash_print_status()
+{
+  console.log("SR1: 0x" + status.toString(16))
+  console.log(" - SPRL: " + ((status & (1 << 7)) == 0 ? "unlocked" : "locked"));
+  console.log(" -  SPM: " + (((data[1] & (1 << 6)) == 0) ? "Byte/Page Prog Mode" : "Sequential Prog Mode"));
+  console.log(" -  EPE: " + (((data[1] & (1 << 5)) == 0) ? "Erase/Prog success" : "Erase/Prog error"));
+  console.log("-  SPM: " +  (((data[1] & (1 << 4)) == 0) ?  "~WP asserted" : "~WP deasserted"));
+
+  var spm = "";
+  switch((status >> 2) & 0x3) {
+    case 0:
+      spm = "All sectors unprotected";
+      break;
+    case 1:
+      spm = "Some sectors protected";
+      break;
+    case 2:
+      spm = "Reserved (xxxx 10xx)";
+      break;
+    case 3:
+      spm = "All sectors protected";
+      break;
+  }
+
+  console.log(" -  SWP: " + spm);
+  console.log(" -  WEL: " + (((data[1] & (1 << 1)) == 0) ? "Not write enabled" : "Write enabled"));
+  console.log(" - ~RDY: " + (((data[1] & (1 << 0)) == 0) ? "Ready" : "Busy"));
+}
+
+
 //-- Read the Flash ID, for testing purposes
 function test_mode()
 {
@@ -335,8 +381,56 @@ flash_release_reset();
 sleep.usleep(100000);
 
 //-- Test Mode
-test_mode()
+//test_mode()
 
+//-- Programing the FPGA
+
+//-- Open the bitstream file
+const BITSTREAM_FILE = 'test.bin'
+var data = fs.readFileSync(BITSTREAM_FILE)
+console.log("Filename: " + BITSTREAM_FILE)
+var file_size = data.length
+console.log("Length: " + file_size)
+console.log (data)
+
+console.log("reset..");
+flash_chip_deselect();
+sleep.usleep(250000);
+
+console.log("cdone: " + (cdone ? "high" : "low"))
+
+flash_reset();
+flash_power_up();
+flash_read_id();
+
+// ---------------------------------------------------------
+// Program
+// ---------------------------------------------------------
+console.log("Length: " + file_size)
+
+var rw_offset = 0;
+
+var begin_addr = rw_offset & ~0xffff;
+var end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
+
+//-- Test
+var status = flash_read_status();
+console.log("Status: " + status.toString(16));
+
+flash_print_status(status)
+
+
+/*
+					for (int addr = begin_addr; addr < end_addr; addr += 0x10000) {
+						flash_write_enable();
+						flash_64kB_sector_erase(addr);
+						if (verbose) {
+							fprintf(stderr, "Status after block erase:\n");
+							flash_read_status();
+						}
+						flash_wait();
+					}
+*/
 
 
 
