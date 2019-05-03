@@ -9,8 +9,10 @@ electron.app.on('ready', ()=>{
 
   // Crear la ventana principal de nuestra Interfaz Gráfica
   let win = new electron.BrowserWindow({
-    width: 300,
-    height: 200,
+    minWidth: 300,
+    minHeight: 200,
+    width:300,
+    height:200,
     //resizable: false,
     icon: './app/icelectron-icon.png',
   })
