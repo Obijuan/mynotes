@@ -26,6 +26,7 @@ const MC_DATA_BITS = 0x02 // When set count bits not bytes
 // Flash command definitions
 // This command list is based on the Winbond W25Q128JV Datasheet
 
+const FC_WE = 0x06;  // Write Enable
 const FC_RPD = 0xAB; // Release Power-Down, returns Device ID
 const FC_JEDECID = 0x9F; // Read JEDEC ID
 const FC_PD = 0xB9; // Power-down
@@ -309,13 +310,40 @@ function flash_read_status()
 	return data[1];
 }
 
-function flash_print_status()
+function flash_write_enable(verbose)
+{
+	if (verbose) {
+		console.log("status before enable:");
+		var status = flash_read_status();
+    flash_print_status(status)
+	}
+
+	if (verbose)
+		console.log("write enable..");
+
+  let data = new Buffer.alloc(1);
+  data[0] = FC_WE;
+
+	flash_chip_select();
+	mpsse_xfer_spi(data, 1);
+	flash_chip_deselect();
+
+	if (verbose) {
+		console.log("status after enable:");
+		status = flash_read_status();
+    flash_print_status(status)
+	}
+}
+
+
+
+function flash_print_status(status)
 {
   console.log("SR1: 0x" + status.toString(16))
   console.log(" - SPRL: " + ((status & (1 << 7)) == 0 ? "unlocked" : "locked"));
-  console.log(" -  SPM: " + (((data[1] & (1 << 6)) == 0) ? "Byte/Page Prog Mode" : "Sequential Prog Mode"));
-  console.log(" -  EPE: " + (((data[1] & (1 << 5)) == 0) ? "Erase/Prog success" : "Erase/Prog error"));
-  console.log("-  SPM: " +  (((data[1] & (1 << 4)) == 0) ?  "~WP asserted" : "~WP deasserted"));
+  console.log(" -  SPM: " + (((status & (1 << 6)) == 0) ? "Byte/Page Prog Mode" : "Sequential Prog Mode"));
+  console.log(" -  EPE: " + (((status & (1 << 5)) == 0) ? "Erase/Prog success" : "Erase/Prog error"));
+  console.log("-  SPM: " +  (((status & (1 << 4)) == 0) ?  "~WP asserted" : "~WP deasserted"));
 
   var spm = "";
   switch((status >> 2) & 0x3) {
@@ -334,8 +362,8 @@ function flash_print_status()
   }
 
   console.log(" -  SWP: " + spm);
-  console.log(" -  WEL: " + (((data[1] & (1 << 1)) == 0) ? "Not write enabled" : "Write enabled"));
-  console.log(" - ~RDY: " + (((data[1] & (1 << 0)) == 0) ? "Ready" : "Busy"));
+  console.log(" -  WEL: " + (((status & (1 << 1)) == 0) ? "Not write enabled" : "Write enabled"));
+  console.log(" - ~RDY: " + (((status & (1 << 0)) == 0) ? "Ready" : "Busy"));
 }
 
 
@@ -414,10 +442,14 @@ var begin_addr = rw_offset & ~0xffff;
 var end_addr = (rw_offset + file_size + 0xffff) & ~0xffff;
 
 //-- Test
-var status = flash_read_status();
-console.log("Status: " + status.toString(16));
+let addr = begin_addr;
+flash_write_enable(true);
 
-flash_print_status(status)
+//-- Test
+//var status = flash_read_status();
+//console.log("Status: " + status.toString(16));
+
+//flash_print_status(status)
 
 
 /*
@@ -430,6 +462,29 @@ flash_print_status(status)
 						}
 						flash_wait();
 					}
+*/
+
+/*
+static void flash_write_enable()
+{
+	if (verbose) {
+		fprintf(stderr, "status before enable:\n");
+		flash_read_status();
+	}
+
+	if (verbose)
+		fprintf(stderr, "write enable..\n");
+
+	uint8_t data[1] = { FC_WE };
+	flash_chip_select();
+	mpsse_xfer_spi(data, 1);
+	flash_chip_deselect();
+
+	if (verbose) {
+		fprintf(stderr, "status after enable:\n");
+		flash_read_status();
+	}
+}
 */
 
 
