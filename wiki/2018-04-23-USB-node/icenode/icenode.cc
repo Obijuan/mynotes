@@ -134,6 +134,17 @@ void ftdi_usb_reset(const v8::FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(ret);
 }
 
+void ftdi_usb_close(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  FtdiContextWrapper* ctx = node::ObjectWrap::Unwrap<FtdiContextWrapper>(
+    args[0]->ToObject());
+
+  int ret = ftdi_usb_close(&ctx->_ftdic);
+
+  args.GetReturnValue().Set(ret);
+}
+
 void ftdi_usb_purge_buffers(const v8::FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
   HandleScope scope(isolate);
@@ -218,7 +229,6 @@ void ftdi_read_data(const v8::FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(rc);
 }
 
-
 void InitAll(Local<Object> exports) {
   FtdiContextWrapper::Init(exports);
   NODE_SET_METHOD(exports, "hello", Method);
@@ -236,6 +246,7 @@ void InitAll(Local<Object> exports) {
   NODE_SET_METHOD(exports, "ftdi_set_bitmode", ftdi_set_bitmode);
   NODE_SET_METHOD(exports, "ftdi_write_data", ftdi_write_data);
   NODE_SET_METHOD(exports, "ftdi_read_data", ftdi_read_data);
+  NODE_SET_METHOD(exports, "ftdi_usb_close", ftdi_usb_close);
 
 }
 

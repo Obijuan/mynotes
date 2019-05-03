@@ -185,24 +185,10 @@ function mpsse_send_spi(data, n)
 	}
 }
 
-/*
-void mpsse_send_spi(uint8_t *data, int n)
+function mpsse_close()
 {
-	if (n < 1)
-		return;
-
-	// Output only, update data on negative clock edge.
-	mpsse_send_byte(MC_DATA_OUT | MC_DATA_OCN);
-	mpsse_send_byte(n - 1);
-	mpsse_send_byte((n - 1) >> 8);
-
-	int rc = ftdi_write_data(&mpsse_ftdic, data, n);
-	if (rc != n) {
-		fprintf(stderr, "Write error (chunk, rc=%d, expected %d).\n", rc, n);
-		mpsse_error(2);
-	}
+	libftdi.ftdi_usb_close(ctx);
 }
-*/
 
 
 // ---------------------------------------------------------
@@ -526,7 +512,8 @@ sleep.usleep(100000);
 //-- Programing the FPGA
 
 //-- Open the bitstream file
-const BITSTREAM_FILE = 'test.bin'
+//const BITSTREAM_FILE = 'test.bin'
+const BITSTREAM_FILE = 'test-LED7.bin'
 let bitstream_data = fs.readFileSync(BITSTREAM_FILE)
 console.log("Filename: " + BITSTREAM_FILE)
 var file_size = bitstream_data.length
@@ -594,18 +581,35 @@ if (remaining > 0) {
   flash_prog(rw_offset + addr, buf, remaining, true);
   flash_wait();
 }
-//console.log(buf)
-//console.log("Lenght: " + buf.length)
-
 
 /*
-// Buffer
-var buf = new Buffer.alloc(256);
+fprintf(stderr, "reading.. for verification\n");
+			for (int addr = 0; true; addr += 256) {
+				uint8_t buffer_flash[256], buffer_file[256];
+				int rc = fread(buffer_file, 1, 256, f);
+				if (rc <= 0)
+					break;
+				flash_read(rw_offset + addr, buffer_flash, rc);
+				if (memcmp(buffer_file, buffer_flash, rc)) {
+					fprintf(stderr, "Found difference between flash and file!\n");
+					mpsse_error(3);
+				}
+			}
 
-// Read eeprom
-var size = libftdi.ftdi_read_eeprom_getsize(ctx, buf)
-console.log(libftdi.ftdi_get_error_string(ctx));
-console.log('Byte count: ' + size);
-console.log(buf.length)
-console.log(buf.toString('hex'));
+			fprintf(stderr, "VERIFY OK\n");
 */
+
+
+// ---------------------------------------------------------
+// Reset
+// ---------------------------------------------------------
+
+flash_power_down();
+
+set_cs_creset(1, 1);
+sleep.usleep(250000);
+
+console.log("cdone: " + (cdone ? "high" : "low"))
+
+console.log("Bye.")
+mpsse_close(ctx)
