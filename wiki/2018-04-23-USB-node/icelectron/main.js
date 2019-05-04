@@ -1,5 +1,5 @@
 const electron = require('electron')
-
+require('usb')
 console.log("Arrancando electron...")
 
 //-- Punto de entrada. En cuanto electron está listo,
