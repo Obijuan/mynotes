@@ -2,7 +2,8 @@ require('jquery')
 require('popper.js')
 require("bootstrap")
 var usb = require('usb')
-console.log("Estoy en index.js")
+var events = require('events');
+var fpga = new events.EventEmitter();
 
 const VENDOR_ID = 0x403;
 const PRODUCT_ID = 0x6010;
@@ -29,12 +30,10 @@ function main()
           device.close();
           if (vid == VENDOR_ID && pid == PRODUCT_ID) {
             console.log("Dispositivo conectado:" + product);
-            display.innerHTML = "OK!: " + product;
+            fpga.emit('attach', product);
           }
       });
     });
-
-
 
   });
 
@@ -49,7 +48,12 @@ function main()
       console.log("DESCONECTADO!")
       display.innerHTML = "Connect your FPGA board";
     }
+  });
 
-  })
+  fpga.on('attach', (product)=>{
+    console.log("FPGA!!!!!!")
+    //console.log(device);
+    display.innerHTML = "OK!: " + product;
+  });
 
 }
