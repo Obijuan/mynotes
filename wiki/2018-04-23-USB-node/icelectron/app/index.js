@@ -8,52 +8,81 @@ var fpga = new events.EventEmitter();
 const VENDOR_ID = 0x403;
 const PRODUCT_ID = 0x6010;
 
+//-- FPGA board constructor
+function fpga_dev(product, manufacturer)
+{
+  this.product = product;
+  this.manufacturer = manufacturer;
+}
+
+/* Get the description of the Board: Product and manufacturer */
+function get_description(device, callback) {
+  device.open();
+  dd = device.deviceDescriptor;
+  device.getStringDescriptor(dd.iManufacturer, (err, manufacturer) => {
+    device.getStringDescriptor(dd.iProduct, (err, product) => {
+        device.close();
+        let desc = new fpga_dev(product, manufacturer);
+        console.log("Prueba: " + desc)
+        callback(desc)
+    });
+  });
+}
+
 function main()
 {
   console.log("Main loop!!")
 
-  display = document.getElementById('display')
+  let display = document.getElementById('display')
 
-  usb.on('attach', (device)=> {
-    bus = device.busNumber
-    addr = device.deviceAddress
-    deviceDescriptor = device.deviceDescriptor
-    vid = device.deviceDescriptor.idVendor
-    pid = device.deviceDescriptor.idProduct
-    console.log("Bus " + bus + " Device " + addr + ": ID " + vid.toString(16) + ":" + pid.toString(16))
+  //-- Check the current devices connected
+  let device = usb.findByIds(VENDOR_ID, PRODUCT_ID);
 
-    device.open();
-    device.getStringDescriptor(deviceDescriptor.iManufacturer, function (err, manufacturer) {
-      device.getStringDescriptor(deviceDescriptor.iProduct, function (err, product) {
-          console.log("Manufacturer: " + manufacturer);
-          console.log("Product: " + product);
-          device.close();
-          if (vid == VENDOR_ID && pid == PRODUCT_ID) {
-            console.log("Dispositivo conectado:" + product);
-            fpga.emit('attach', product);
-          }
-      });
+  //-- If connected, emit the attach event
+  if (device) {
+    get_description(device, (desc)=>{
+      console.log(desc);
+      fpga.emit('attach', desc);
     });
+  }
 
-  });
+  //-- Evento: Conexión de un USB
+  //-- Comprobar si es una FPGA
+  usb.on('attach', (device)=> {
+    dd = device.deviceDescriptor;
+    vid = dd.idVendor
+    pid = dd.idProduct
 
-  usb.on('detach', (device) => {
-    bus = device.busNumber
-    addr = device.deviceAddress
-    deviceDescriptor = device.deviceDescriptor
-    vid = device.deviceDescriptor.idVendor
-    pid = device.deviceDescriptor.idProduct
-    console.log("Bus " + bus + " Device " + addr + ": ID " + vid.toString(16) + ":" + pid.toString(16))
     if (vid == VENDOR_ID && pid == PRODUCT_ID) {
-      console.log("DESCONECTADO!")
-      display.innerHTML = "Connect your FPGA board";
+      get_description(device, (desc)=> {
+        console.log(desc);
+        fpga.emit('attach', desc);
+      });
     }
   });
 
-  fpga.on('attach', (product)=>{
+  //-- Evento: Desconexión de un USB
+  //-- Comprobar si es una FPGA
+  usb.on('detach', (device) => {
+    dd = device.deviceDescriptor;
+    vid = dd.idVendor
+    pid = dd.idProduct
+
+    if (vid == VENDOR_ID && pid == PRODUCT_ID) {
+      fpga.emit('detach');
+    }
+  });
+
+  //-- Evento: FPGA conectada
+  fpga.on('attach', (board)=>{
     console.log("FPGA!!!!!!")
-    //console.log(device);
-    display.innerHTML = "OK!: " + product;
+    display.innerHTML = "OK!: " + board.product;
+  });
+
+  //-- Evento: FPGA desconectada
+  fpga.on('detach', () => {
+    console.log("DETACH!")
+    display.innerHTML = "Connect your FPGA board"
   });
 
 }
