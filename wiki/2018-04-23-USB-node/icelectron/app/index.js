@@ -4,6 +4,9 @@ require("bootstrap")
 var usb = require('usb')
 console.log("Estoy en index.js")
 
+const VENDOR_ID = 0x403;
+const PRODUCT_ID = 0x6010;
+
 function main()
 {
   console.log("Main loop!!")
@@ -11,13 +14,42 @@ function main()
   display = document.getElementById('display')
 
   usb.on('attach', (device)=> {
-    console.log("Dispositivo conectado!");
-    display.innerHTML = "OK!";
+    bus = device.busNumber
+    addr = device.deviceAddress
+    deviceDescriptor = device.deviceDescriptor
+    vid = device.deviceDescriptor.idVendor
+    pid = device.deviceDescriptor.idProduct
+    console.log("Bus " + bus + " Device " + addr + ": ID " + vid.toString(16) + ":" + pid.toString(16))
+
+    device.open();
+    device.getStringDescriptor(deviceDescriptor.iManufacturer, function (err, manufacturer) {
+      device.getStringDescriptor(deviceDescriptor.iProduct, function (err, product) {
+          console.log("Manufacturer: " + manufacturer);
+          console.log("Product: " + product);
+          device.close();
+          if (vid == VENDOR_ID && pid == PRODUCT_ID) {
+            console.log("Dispositivo conectado:" + product);
+            display.innerHTML = "OK!: " + product;
+          }
+      });
+    });
+
+
+
   });
 
-  usb.on('detach', (devide) => {
-    console.log("DESCONECTADO!")
-    display.innerHTML = "DISCONNECTED!";
+  usb.on('detach', (device) => {
+    bus = device.busNumber
+    addr = device.deviceAddress
+    deviceDescriptor = device.deviceDescriptor
+    vid = device.deviceDescriptor.idVendor
+    pid = device.deviceDescriptor.idProduct
+    console.log("Bus " + bus + " Device " + addr + ": ID " + vid.toString(16) + ":" + pid.toString(16))
+    if (vid == VENDOR_ID && pid == PRODUCT_ID) {
+      console.log("DESCONECTADO!")
+      display.innerHTML = "Connect your FPGA board";
+    }
+
   })
 
 }
