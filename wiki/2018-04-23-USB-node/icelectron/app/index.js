@@ -88,7 +88,7 @@ function main()
   //-- Evento: FPGA desconectada
   fpga.on('detach', () => {
     console.log("DETACH!")
-    display.innerHTML = "Connect your FPGA board"
+    display.innerHTML = "Connect your <mark>FPGA</mark> board"
     manufacturer.innerHTML = "";
     product.innerHTML = "";
     description.style.visibility = "hidden";
