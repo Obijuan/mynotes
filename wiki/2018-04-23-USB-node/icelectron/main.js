@@ -11,10 +11,13 @@ electron.app.on('ready', ()=>{
   let win = new electron.BrowserWindow({
     minWidth: 300,
     minHeight: 200,
-    width:300,
-    height:200,
+    width:600,
+    height:650,
     //resizable: false,
     icon: './app/icelectron-icon.png',
+    webPreferences: {
+      nodeIntegration: true,
+    }
   })
 
   //win.setMenuBarVisibility(false)
