@@ -10,9 +10,17 @@
 
   <body onload="main();">
 
-    <div class="container-fluid">
-      <h1>Icelectron</h1>
-      <p id="display">Connect your FPGA board</p>
+    <div class="container-fluid" style="background-color:lavender">
+        <h1 >Icelectron</h1>
+        <p id="display">Connect your FPGA board</p>
+        <div class="row" id="description" style="background-color:orange;visibility: hidden;">
+          <div class="col">Manufacturer</div>
+          <div class="col">Product</div>
+        </div>
+        <div class="row" style="background-color:white">
+          <div class="col" id="manufacturer"></div>
+          <div class="col" id="product"></div>
+        </div>
     </div>
 
   </body>

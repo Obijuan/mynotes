@@ -34,6 +34,9 @@ function main()
   console.log("Main loop!!")
 
   let display = document.getElementById('display')
+  let manufacturer = document.getElementById('manufacturer')
+  let product = document.getElementById('product')
+  let description = document.getElementById('description')
 
   //-- Check the current devices connected
   let device = usb.findByIds(VENDOR_ID, PRODUCT_ID);
@@ -76,13 +79,19 @@ function main()
   //-- Evento: FPGA conectada
   fpga.on('attach', (board)=>{
     console.log("FPGA!!!!!!")
-    display.innerHTML = "OK!: " + board.product;
+    display.innerHTML = "OK!";
+    manufacturer.innerHTML = board.manufacturer;
+    product.innerHTML = board.product;
+    description.style.visibility = "visible";
   });
 
   //-- Evento: FPGA desconectada
   fpga.on('detach', () => {
     console.log("DETACH!")
     display.innerHTML = "Connect your FPGA board"
+    manufacturer.innerHTML = "";
+    product.innerHTML = "";
+    description.style.visibility = "hidden";
   });
 
 }
