@@ -37,6 +37,7 @@ function main()
   let manufacturer = document.getElementById('manufacturer')
   let product = document.getElementById('product')
   let description = document.getElementById('description')
+  let connection = document.getElementById('connection')
 
   //-- Check the current devices connected
   let device = usb.findByIds(VENDOR_ID, PRODUCT_ID);
@@ -83,6 +84,7 @@ function main()
     manufacturer.innerHTML = board.manufacturer;
     product.innerHTML = board.product;
     description.style.visibility = "visible";
+    connection.src = "icelectron-A2-on-300px.png"
   });
 
   //-- Evento: FPGA desconectada
@@ -92,6 +94,7 @@ function main()
     manufacturer.innerHTML = "";
     product.innerHTML = "";
     description.style.visibility = "hidden";
+    connection.src = "icelectron-A2-off-300px.png"
   });
 
 }

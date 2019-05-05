@@ -12,7 +12,7 @@ electron.app.on('ready', ()=>{
     minWidth: 500,
     minHeight: 300,
     width:600,
-    height:550,
+    height:620,
     //resizable: false,
     icon: './app/icelectron-icon.png',
     webPreferences: {
