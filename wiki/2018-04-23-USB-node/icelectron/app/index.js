@@ -9,8 +9,9 @@ var libftdi = require('./icenode')
 const ctx = libftdi.create_context();
 var fpga = new events.EventEmitter();
 var interval = 0;
-const BITSTREAM_FILE = './test-LED7.bin'
-const bitstream_data = fs.readFileSync(BITSTREAM_FILE)
+var BITSTREAM_FILE1 = './test-LED0.bin'
+var BITSTREAM_FILE2 = './test-LED7.bin'
+var bitstream_data = fs.readFileSync(BITSTREAM_FILE1)
 var file_size = bitstream_data.length
 
 // FTDI USB identifiers
@@ -617,6 +618,12 @@ function main()
     description.style.visibility = "visible";
     connection.src = "icelectron-A2-on-300px.png"
     button_test1.disabled = false;
+    button_test2.disabled = false;
+    var current_progress = 0;
+    $("#progressbar")
+      .css("width", current_progress + "%")
+      .attr("aria-valuenow", current_progress)
+      .text(current_progress + "% Idle");
   });
 
   //-- Evento: FPGA desconectada
@@ -628,12 +635,33 @@ function main()
     description.style.visibility = "hidden";
     connection.src = "icelectron-A2-off-300px.png"
     button_test1.disabled = true;
+    button_test2.disabled = true;
+    $('#progressbar').hide();
+    $("#progressbar").width(0 + "%");
+    $('#progressbar').show();
   });
 
   //-- Test1 button pressed
   button_test1.onclick = ()=> {
     console.log("Test1!!")
     console.log(process.version);
+    bitstream_data = fs.readFileSync(BITSTREAM_FILE1)
+    file_size = bitstream_data.length
+    prog_step0();
+  }
+
+  //-- Test1 button pressed
+  button_test2.onclick = ()=> {
+    console.log("Test2!!")
+    console.log(process.version);
+    bitstream_data = fs.readFileSync(BITSTREAM_FILE2)
+    file_size = bitstream_data.length
+    prog_step0();
+  }
+
+
+  function prog_step0()
+  {
 
     //------------------------- MAIN -------------------------------
 
@@ -667,7 +695,7 @@ function main()
 
     //-- Open the bitstream file
     //const BITSTREAM_FILE = 'test.bin'
-    console.log("Filename: " + BITSTREAM_FILE)
+    //console.log("Filename: " + BITSTREAM_FILE)
     console.log("Length: " + file_size)
 
     console.log("reset..");
