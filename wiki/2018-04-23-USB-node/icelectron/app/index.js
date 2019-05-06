@@ -677,7 +677,7 @@ function main()
     $("#progressbar")
       .css("width", current_progress + "%")
       .attr("aria-valuenow", current_progress)
-      .text(current_progress + "% Complete");
+      .text(current_progress + "% Reset");
   }
 
   function prog_step2()
@@ -693,7 +693,7 @@ function main()
     $("#progressbar")
       .css("width", current_progress + "%")
       .attr("aria-valuenow", current_progress)
-      .text(current_progress + "% Complete");
+      .text(current_progress + "% Reset");
     interval = setTimeout(prog_step3, 1);
   }
 
@@ -723,9 +723,21 @@ function main()
         flash_print_status(status)
       flash_wait(verbose);
     }
+    var current_progress = 20;
+    $("#progressbar")
+      .css("width", current_progress + "%")
+      .attr("aria-valuenow", current_progress)
+      .text(current_progress + "% Erasing");
+    interval = setTimeout(prog_step4, 100);
 
+  }
+
+  function prog_step4()
+  {
+    clearTimeout(interval);
     console.log("programming..")
 
+    let rw_offset = 0;
     let addr = 0;
     let total_blocks = Math.trunc(file_size / 256);
     let remaining = Math.trunc(file_size % 256);
@@ -752,12 +764,26 @@ function main()
       flash_wait();
     }
 
+    var current_progress = 60;
+    $("#progressbar")
+      .css("width", current_progress + "%")
+      .attr("aria-valuenow", current_progress)
+      .text(current_progress + "% Programming");
+    interval = setTimeout(prog_step5, 10);
+  }
+
+  function prog_step5()
+  {
+    clearTimeout(interval);
     //-----------------------------------------------------------
     //   VERYFICATION
     //-----------------------------------------------------------
 
     console.log("reading.. for verification");
-    addr = 0;
+    let addr = 0;
+    let rw_offset = 0;
+    let total_blocks = Math.trunc(file_size / 256);
+    let remaining = Math.trunc(file_size % 256);
     let buf_flash = new Buffer.alloc(256);
 
     //-- Verify complete blocks
@@ -786,7 +812,18 @@ function main()
     flash_power_down();
 
     set_cs_creset(1, 1);
-    sleep.usleep(250000);
+    var current_progress = 80;
+    $("#progressbar")
+      .css("width", current_progress + "%")
+      .attr("aria-valuenow", current_progress)
+      .text(current_progress + "% Verifying");
+    interval = setTimeout(prog_step6, 250);
+  }
+
+  function prog_step6()
+  {
+
+    clearTimeout(interval);
 
     let cdone = get_cdone()
     console.log("cdone: " + (cdone ? "high" : "low"))
@@ -797,7 +834,7 @@ function main()
     $("#progressbar")
       .css("width", current_progress + "%")
       .attr("aria-valuenow", current_progress)
-      .text(current_progress + "% Complete");
+      .text(current_progress + "% Done");
 
     //interval = setTimeout(reset, 1000);
 
