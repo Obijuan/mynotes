@@ -1,0 +1,18 @@
+{
+  "name": "icenode",
+  "version": "0.0.1",
+  "description": "Bindings for ftdi library",
+  "keywords": "libftdi ftdi",
+  "main": "test.js",
+  "license": "MIT",
+  "gypfile": true,
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "dependencies": {
+    "sleep": "^6.0.0"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^1.8.4"
+  }
+}
