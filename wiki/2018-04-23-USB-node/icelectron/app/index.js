@@ -1,4 +1,4 @@
-require('jquery')
+const $ = require('jquery')
 require('popper.js')
 require("bootstrap")
 var usb = require('usb')
@@ -8,6 +8,7 @@ var events = require('events');
 var libftdi = require('./icenode')
 const ctx = libftdi.create_context();
 var fpga = new events.EventEmitter();
+var interval = 0;
 
 // FTDI USB identifiers
 const usbVendor = 0x0403;
@@ -564,6 +565,7 @@ function main()
   let description = document.getElementById('description')
   let connection = document.getElementById('connection')
   let button_test1 = document.getElementById('button_test1')
+  let progressbar = document.getElementById('progressbar')
 
   //-- Check the current devices connected
   let device = usb.findByIds(VENDOR_ID, PRODUCT_ID);
@@ -632,7 +634,9 @@ function main()
 
     //------------------------- MAIN -------------------------------
 
-    //------------------------- MAIN -------------------------------
+    $('#progressbar').hide();
+    $("#progressbar").width(1 + "%");
+    $('#progressbar').show();
 
     //-- Inicializar USB
     console.log("init..")
@@ -646,8 +650,13 @@ function main()
     console.log("Cdone: " + (cdone ? "high" : "low"))
 
     flash_release_reset();
-    sleep.usleep(100000);
+    interval = setTimeout(prog_step1, 100);
 
+  };
+
+  function prog_step1()
+  {
+    clearTimeout(interval);
     //-- Test Mode
     //test_mode()
 
@@ -665,6 +674,7 @@ function main()
     flash_chip_deselect();
     sleep.usleep(250000);
 
+    let cdone = get_cdone()
     console.log("cdone: " + (cdone ? "high" : "low"))
 
     flash_reset();
@@ -762,9 +772,31 @@ function main()
     console.log("cdone: " + (cdone ? "high" : "low"))
 
     console.log("Bye.")
+    //progressbar.style.width = '100%';
+    var current_progress = 100;
+    $("#progressbar")
+      .css("width", current_progress + "%")
+      .attr("aria-valuenow", current_progress)
+      .text(current_progress + "% Complete");
+
+    //interval = setTimeout(reset, 1000);
+
     //mpsse_close(ctx)
 
+    // elem.style.width = width + '%';
+  }
 
+  function reset () {
+    clearTimeout(interval);
+    var current_progress = 0;
+    //$("#progressbar")
+    //  .css("width", current_progress + "%")
+    //  .attr("aria-valuenow", current_progress)
+    //  .text(current_progress + "% Complete");
+
+      $('#progressbar').hide();
+      $("#progressbar").width(0 + "%");
+      $('#progressbar').show();
   }
 
 }
