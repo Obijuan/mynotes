@@ -9,6 +9,9 @@ var libftdi = require('./icenode')
 const ctx = libftdi.create_context();
 var fpga = new events.EventEmitter();
 var interval = 0;
+const BITSTREAM_FILE = './test-LED7.bin'
+const bitstream_data = fs.readFileSync(BITSTREAM_FILE)
+var file_size = bitstream_data.length
 
 // FTDI USB identifiers
 const usbVendor = 0x0403;
@@ -664,23 +667,39 @@ function main()
 
     //-- Open the bitstream file
     //const BITSTREAM_FILE = 'test.bin'
-    const BITSTREAM_FILE = './test-LED7.bin'
-    let bitstream_data = fs.readFileSync(BITSTREAM_FILE)
     console.log("Filename: " + BITSTREAM_FILE)
-    var file_size = bitstream_data.length
     console.log("Length: " + file_size)
 
     console.log("reset..");
     flash_chip_deselect();
-    sleep.usleep(250000);
+    interval = setTimeout(prog_step2, 250);
+    var current_progress = 5;
+    $("#progressbar")
+      .css("width", current_progress + "%")
+      .attr("aria-valuenow", current_progress)
+      .text(current_progress + "% Complete");
+  }
 
+  function prog_step2()
+  {
+    clearTimeout(interval);
     let cdone = get_cdone()
     console.log("cdone: " + (cdone ? "high" : "low"))
 
     flash_reset();
     flash_power_up();
     flash_read_id();
+    var current_progress = 8;
+    $("#progressbar")
+      .css("width", current_progress + "%")
+      .attr("aria-valuenow", current_progress)
+      .text(current_progress + "% Complete");
+    interval = setTimeout(prog_step3, 1);
+  }
 
+  function prog_step3()
+  {
+    clearTimeout(interval);
     // ---------------------------------------------------------
     // Program
     // ---------------------------------------------------------
@@ -769,6 +788,7 @@ function main()
     set_cs_creset(1, 1);
     sleep.usleep(250000);
 
+    let cdone = get_cdone()
     console.log("cdone: " + (cdone ? "high" : "low"))
 
     console.log("Bye.")
