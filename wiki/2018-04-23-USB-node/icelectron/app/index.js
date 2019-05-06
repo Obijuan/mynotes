@@ -2,8 +2,10 @@ require('jquery')
 require('popper.js')
 require("bootstrap")
 var usb = require('usb')
-const libftdi = require('./icenode')
+var sleep = require('sleep');
+var fs = require('fs');
 var events = require('events');
+var libftdi = require('./icenode')
 var fpga = new events.EventEmitter();
 
 
@@ -104,6 +106,19 @@ function main()
   button_test1.onclick = ()=> {
     console.log("Test1!!")
     console.log(process.version);
+
+    //------------------------- MAIN -------------------------------
+
+    //-- Inicializar USB
+    console.log("init..")
+
+    console.log("Waiting 2 seconds...")
+    //sleep.usleep(2000000);
+    console.log("Ready!")
+
   }
+
+  //-- Inicializar el contexto del FTDI aqui
+  var ctx = libftdi.create_context();
 
 }

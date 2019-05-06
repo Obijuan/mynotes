@@ -1,7 +1,8 @@
 const electron = require('electron')
-require('usb')
+//require('usb')
+//require('sleep')
 console.log("Arrancando electron...")
-const libftdi = require('./icenode')
+//const libftdi = require('./icenode')
 
 //-- Punto de entrada. En cuanto electron está listo,
 //-- ejecuta esta función
