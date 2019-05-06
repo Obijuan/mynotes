@@ -2,8 +2,10 @@ require('jquery')
 require('popper.js')
 require("bootstrap")
 var usb = require('usb')
+const libftdi = require('./icenode')
 var events = require('events');
 var fpga = new events.EventEmitter();
+
 
 const VENDOR_ID = 0x403;
 const PRODUCT_ID = 0x6010;
@@ -38,6 +40,7 @@ function main()
   let product = document.getElementById('product')
   let description = document.getElementById('description')
   let connection = document.getElementById('connection')
+  let button_test1 = document.getElementById('button_test1')
 
   //-- Check the current devices connected
   let device = usb.findByIds(VENDOR_ID, PRODUCT_ID);
@@ -96,5 +99,10 @@ function main()
     description.style.visibility = "hidden";
     connection.src = "icelectron-A2-off-300px.png"
   });
+
+  //-- Test1 button pressed
+  button_test1.onclick = ()=> {
+    console.log("Test1!!")
+  }
 
 }
