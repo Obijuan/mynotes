@@ -611,6 +611,7 @@ function main()
     product.innerHTML = board.product;
     description.style.visibility = "visible";
     connection.src = "icelectron-A2-on-300px.png"
+    button_test1.disabled = false;
   });
 
   //-- Evento: FPGA desconectada
@@ -621,6 +622,7 @@ function main()
     product.innerHTML = "";
     description.style.visibility = "hidden";
     connection.src = "icelectron-A2-off-300px.png"
+    button_test1.disabled = true;
   });
 
   //-- Test1 button pressed
