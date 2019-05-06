@@ -7,7 +7,7 @@
   "license": "MIT",
   "gypfile": true,
   "scripts": {
-    "start" : "node test.js",
+    "start": "node test.js",
     "install": "node-gyp rebuild"
   },
   "dependencies": {

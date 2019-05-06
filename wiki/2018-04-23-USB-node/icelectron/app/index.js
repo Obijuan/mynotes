@@ -103,6 +103,7 @@ function main()
   //-- Test1 button pressed
   button_test1.onclick = ()=> {
     console.log("Test1!!")
+    console.log(process.version);
   }
 
 }
