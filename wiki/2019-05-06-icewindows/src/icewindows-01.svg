@@ -10,9 +10,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="37.514137mm"
-   height="41.766373mm"
-   viewBox="0 0 37.514137 41.766373"
+   width="146.38322mm"
+   height="163.09673mm"
+   viewBox="0 0 146.38322 163.09673"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
@@ -26,11 +26,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="50.167457"
-     inkscape:cy="88.188673"
+     inkscape:zoom="0.7"
+     inkscape:cx="531.95374"
+     inkscape:cy="340.98133"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer2"
      showgrid="false"
      inkscape:snap-global="false"
      fit-margin-top="0"
@@ -58,24 +58,27 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Capa 3"
-     transform="translate(-70.870537,-93.081841)">
+     transform="translate(-68.602676,-90.435989)">
     <rect
-       style="fill:#ffffff;stroke:none;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:#ffffff;stroke:none;stroke-width:0.26458329;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect4548"
-       width="37.514137"
-       height="41.766373"
-       x="70.870537"
-       y="93.081841" />
+       width="146.38322"
+       height="163.09673"
+       x="68.602676"
+       y="90.435989"
+       inkscape:export-filename="C:\Users\obijuan\github\mynotes\wiki\2019-05-06-icewindows\icewin-05.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
   <g
      inkscape:label="Capa 1"
      inkscape:groupmode="layer"
      id="layer1"
-     sodipodi:insensitive="true"
-     transform="translate(-70.870537,-93.081841)">
+     transform="translate(-68.602676,-90.435989)"
+     style="display:inline">
     <image
-       y="93.951187"
-       x="72.178337"
+       y="94.909622"
+       x="74.004745"
        id="image3721"
        xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAAHbCAYAAACEOO4hAAAKMWlDQ1BJQ0MgcHJvZmlsZQAASImd
 lndUU9kWh8+9N71QkhCKlNBraFICSA29SJEuKjEJEErAkAAiNkRUcERRkaYIMijggKNDkbEiioUB
@@ -519,27 +522,38 @@ BAkQBYkQQqZTkGSipBIV+d6fUhEk1WiJQkQIIekWpjBRkZIgqYpSlO+EEEJmW5xUvnsKliFRjKDF
 quJDUSKEkNkVo7Ai5LdMKkiqghJGuAghhMyeIMmWyX7z/wPtUav+dlMu+wAAAABJRU5ErkJggg==
 "
        preserveAspectRatio="none"
-       height="40.216667"
-       width="35.559998" />
+       height="154.4975"
+       width="136.60831"
+       style="stroke-width:0.26030627"
+       inkscape:export-filename="C:\Users\obijuan\github\mynotes\wiki\2019-05-06-icewindows\icewin-05.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Capa 2"
-     transform="translate(-70.870537,-93.081841)">
+     transform="translate(-68.602676,-90.435989)"
+     style="display:inline">
     <rect
        style="fill:none;stroke:#ff0000;stroke-width:0.26458329;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3725"
-       width="26.947041"
-       height="3.1616704"
-       x="73.289658"
-       y="101.8158" />
+       width="103.52052"
+       height="10.067093"
+       x="80.163902"
+       y="126.44548"
+       inkscape:export-filename="C:\Users\obijuan\github\mynotes\wiki\2019-05-06-icewindows\icewin-05.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <rect
        style="fill:none;stroke:#ff0000;stroke-width:0.26458329;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3725-6"
-       width="26.34568"
-       height="1.2907838"
-       x="73.490112"
-       y="122.46237" />
+       width="102.15526"
+       height="4.9587116"
+       x="79.989021"
+       y="204.06102"
+       inkscape:export-filename="C:\Users\obijuan\github\mynotes\wiki\2019-05-06-icewindows\icewin-05.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
 </svg>
