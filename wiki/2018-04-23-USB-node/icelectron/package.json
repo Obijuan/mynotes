@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "bootstrap": "^4.3.1",
-    "electron": "^5.0.0",
+    "electron": "^15.5.5",
     "jquery": "^3.4.1",
     "popper.js": "^1.14.7",
     "sleep": "^6.0.0",
